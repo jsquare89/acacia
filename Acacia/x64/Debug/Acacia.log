@@ -1,0 +1,56 @@
+﻿Build started 1/18/2017 10:50:14 AM.
+     1>Project "C:\Users\Jarred\Desktop\Final Project\Acacia Engine\Acacia\Acacia\Acacia.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\CL.exe /c /I"C:\Users\Jarred\Desktop\Final Project\Acacia Engine\Acacia\deps\include" /ZI /nologo /W3 /WX- /sdl /Od /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Yc"stdafx.h" /Fp"x64\Debug\Acacia.pch" /Fo"x64\Debug\\" /Fd"x64\Debug\vc140.pdb" /Gd /TP /errorReport:prompt stdafx.cpp
+         stdafx.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\CL.exe /c /I"C:\Users\Jarred\Desktop\Final Project\Acacia Engine\Acacia\deps\include" /ZI /nologo /W3 /WX- /sdl /Od /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Yu"stdafx.h" /Fp"x64\Debug\Acacia.pch" /Fo"x64\Debug\\" /Fd"x64\Debug\vc140.pdb" /Gd /TP /errorReport:prompt Engine.cpp Errors.cpp GLSLProgram.cpp main.cpp
+         main.cpp
+         GLSLProgram.cpp
+         Errors.cpp
+         Engine.cpp
+     1>c:\users\jarred\desktop\final project\acacia engine\acacia\acacia\engine.cpp(77): warning C4305: '+=': truncation from 'double' to 'float'
+         Generating Code...
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Jarred\Desktop\Final Project\Acacia Engine\Acacia\x64\Debug\Acacia.exe" /INCREMENTAL /NOLOGO /LIBPATH:"C:\Users\Jarred\Desktop\Final Project\Acacia Engine\Acacia\deps\lib" opengl32.lib glew32.lib SDL2.lib SDL2main.lib SDL2_ttf.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Jarred\Desktop\Final Project\Acacia Engine\Acacia\x64\Debug\Acacia.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Jarred\Desktop\Final Project\Acacia Engine\Acacia\x64\Debug\Acacia.lib" /MACHINE:X64 x64\Debug\Engine.obj
+         x64\Debug\Errors.obj
+         x64\Debug\GLSLProgram.obj
+         x64\Debug\main.obj
+         x64\Debug\stdafx.obj
+     1>Engine.obj : error LNK2019: unresolved external symbol SDL_CreateWindow referenced in function "private: void __cdecl Engine::initSystems(void)" (?initSystems@Engine@@AEAAXXZ)
+     1>Engine.obj : error LNK2019: unresolved external symbol SDL_GL_SetAttribute referenced in function "private: void __cdecl Engine::initSystems(void)" (?initSystems@Engine@@AEAAXXZ)
+     1>Engine.obj : error LNK2019: unresolved external symbol SDL_GL_CreateContext referenced in function "private: void __cdecl Engine::initSystems(void)" (?initSystems@Engine@@AEAAXXZ)
+     1>Engine.obj : error LNK2019: unresolved external symbol SDL_GL_SwapWindow referenced in function "private: void __cdecl Engine::render(void)" (?render@Engine@@AEAAXXZ)
+     1>Engine.obj : error LNK2019: unresolved external symbol SDL_PollEvent referenced in function "private: void __cdecl Engine::handleInput(void)" (?handleInput@Engine@@AEAAXXZ)
+     1>Engine.obj : error LNK2019: unresolved external symbol SDL_Init referenced in function "private: void __cdecl Engine::initSystems(void)" (?initSystems@Engine@@AEAAXXZ)
+     1>Engine.obj : error LNK2019: unresolved external symbol __imp_glewInit referenced in function "private: void __cdecl Engine::initSystems(void)" (?initSystems@Engine@@AEAAXXZ)
+     1>Engine.obj : error LNK2001: unresolved external symbol __imp___glewUniform1f
+     1>Errors.obj : error LNK2019: unresolved external symbol SDL_Quit referenced in function "void __cdecl fatalError(class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >)" (?fatalError@@YAXV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z)
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewAttachShader
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewBindAttribLocation
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewCompileShader
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewCreateProgram
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewCreateShader
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewDeleteProgram
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewDeleteShader
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewDetachShader
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewDisableVertexAttribArray
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewEnableVertexAttribArray
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewGetProgramInfoLog
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewGetProgramiv
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewGetShaderInfoLog
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewGetShaderiv
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewGetUniformLocation
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewLinkProgram
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewShaderSource
+     1>GLSLProgram.obj : error LNK2001: unresolved external symbol __imp___glewUseProgram
+     1>MSVCRTD.lib(exe_main.obj) : error LNK2019: unresolved external symbol main referenced in function "int __cdecl invoke_main(void)" (?invoke_main@@YAHXZ)
+     1>C:\Users\Jarred\Desktop\Final Project\Acacia Engine\Acacia\deps\lib\glew32.lib : warning LNK4272: library machine type 'X86' conflicts with target machine type 'x64'
+     1>C:\Users\Jarred\Desktop\Final Project\Acacia Engine\Acacia\deps\lib\SDL2.lib : warning LNK4272: library machine type 'X86' conflicts with target machine type 'x64'
+     1>C:\Users\Jarred\Desktop\Final Project\Acacia Engine\Acacia\deps\lib\SDL2main.lib : warning LNK4272: library machine type 'X86' conflicts with target machine type 'x64'
+     1>C:\Users\Jarred\Desktop\Final Project\Acacia Engine\Acacia\deps\lib\SDL2_ttf.lib : warning LNK4272: library machine type 'X86' conflicts with target machine type 'x64'
+     1>C:\Users\Jarred\Desktop\Final Project\Acacia Engine\Acacia\x64\Debug\Acacia.exe : fatal error LNK1120: 28 unresolved externals
+     1>Done Building Project "C:\Users\Jarred\Desktop\Final Project\Acacia Engine\Acacia\Acacia\Acacia.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:02.48
