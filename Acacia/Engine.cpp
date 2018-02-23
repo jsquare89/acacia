@@ -28,7 +28,20 @@ void Engine::run()
 
 void Engine::initSystems()
 {
-	// Setup window using SDL
+	setupWindowSDL();
+	initShaders();
+	camera = new Camera();
+	initMouse();
+}
+
+void Engine::initMouse()
+{
+	mouseLastX = screenWidth / 2.0f;
+	mouseLastY = screenHeight / 2.0f;
+}
+
+void Engine::setupWindowSDL()
+{
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_ShowCursor(SDL_DISABLE);
 	window = SDL_CreateWindow("Acacia Engine. Beta Version", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, SDL_WINDOW_OPENGL);
@@ -46,16 +59,6 @@ void Engine::initSystems()
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	initShaders();
-
-	camera = new Camera();
-
-	// input mouse init
-	lastX = screenWidth / 2.0f;
-	lastY = screenHeight / 2.0f;
-	firstMouse = true;
-
-
 }
 
 void Engine::initShaders()
@@ -221,28 +224,12 @@ void Engine::mainLoop()
 
 	while (engineState != EngineState::EXIT)
 	{
-		// time
-		time = SDL_GetTicks() / 1000.0f; // time in seconds
-		GLfloat currentFrame = time;
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
-		
-
-
-
+		setDeltaTime();
 		handleInput();
-		handleMovement();
-		
-		//render();
-
-		// Render
-		// Clear the colorbuffer
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		handleMovementOnKeys();
+		clearColorBuffer();
 
 		//camera update
-
-
 		// view matrix
 		glm::mat4 view;
 		view = camera->GetViewMatrix();
@@ -292,123 +279,104 @@ void Engine::mainLoop()
 
 }
 
+void Engine::setDeltaTime()
+{
+	time = SDL_GetTicks() / 1000.0f; // time in seconds
+	GLfloat currentFrame = time;
+	deltaTime = currentFrame - lastFrameTime;
+	lastFrameTime = currentFrame;
+}
+
+void Engine::clearColorBuffer()
+{
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
 void Engine::handleInput()
 {
 	GLfloat cameraSpeed = 0.05f;
-	SDL_Event evnt;
+	SDL_Event event;
 
-	while (SDL_PollEvent(&evnt))
+	while (SDL_PollEvent(&event))
 	{
-		switch (evnt.type)
-		{
-		case SDL_QUIT:
-			engineState = EngineState::EXIT;
-			break;
-		case SDL_MOUSEMOTION:
-		{
-			camera->UpdateViewByMouse(*window, deltaTime, evnt.motion.x, evnt.motion.y, lastX, lastY);
+		handleInputOnEvent(event);
+	}
+}
 
+void Engine::handleInputOnEvent(SDL_Event &event)
+{
+	switch (event.type)
+	{
+	case SDL_QUIT:
+		engineState = EngineState::EXIT;
+		break;
+	case SDL_MOUSEMOTION:
+		camera->UpdateViewByMouse(*window, deltaTime, event.motion.x, event.motion.y, mouseLastX, mouseLastY);
+		break;
+	case SDL_KEYDOWN:
+		updateKeysOnKeyDown(event);
+		break;
+	case SDL_KEYUP:
+		updateKeysOnKeyUp(event);
+		break;
+	}
+}
 
-			//std::cout << evnt.motion.x << " " << evnt.motion.y << std::endl;
-			//// get mouse input
-			//GLfloat xpos = evnt.motion.x;
-			//GLfloat ypos = evnt.motion.y;
+void Engine::updateKeysOnKeyUp(SDL_Event &event)
+{
+	switch (event.key.keysym.sym)
+	{
+	case SDLK_w:
+		inputKeys[SDLK_w] = false;
+		break;
+	case SDLK_a:
+		inputKeys[SDLK_a] = false;
+		break;
+	case SDLK_s:
+		inputKeys[SDLK_s] = false;
+		break;
+	case SDLK_d:
+		inputKeys[SDLK_d] = false;
+		break;
+	default:
+		break;
+	}
+}
 
-			//SDL_WarpMouseInWindow(window, screenWidth / 2, screenHeight / 2);
-
-			//if (firstMouse) // this bool variable is initially set to true
-			//{
-			//	lastX = xpos;
-			//	lastY = ypos;
-			//	firstMouse = false;
-			//}
-
-			//GLfloat xoffset = xpos - lastX;
-			//GLfloat yoffset = lastY - ypos;
-			//lastX = xpos;
-			//lastY = ypos;
-
-			//GLfloat sensitivity = 0.1f;
-			//xoffset *= sensitivity;
-			//yoffset *= sensitivity;
-
-			//// update our yaw and pitch for movement
-			//yaw += xoffset;
-			//pitch += yoffset;
-
-			//// constrain pitch
-			//if (pitch > 89.0f)
-			//	pitch = 89.0f;
-			//if (pitch < -89.0f)
-			//	pitch = -89.0f;
-			//std::cout << "yaw: " << yaw << ", pitch: " << pitch << std::endl;
-
-			//// Camera front updated with yaw/pitch
-			//glm::vec3 front;
-			//front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
-			//front.y = sin(glm::radians(pitch));
-			//front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
-			//cameraFront = glm::normalize(front);
-			//std::cout << "CameraFront: " << glm::to_string(cameraFront) << std::endl;
-
-			
-
-		}
-			break;
-		case SDL_KEYDOWN:
-			switch (evnt.key.keysym.sym)
-			{
-			case SDLK_w:
-				keys[SDLK_w] = true;
-				break;
-			case SDLK_a:
-				keys[SDLK_a] = true;
-				break;
-			case SDLK_s:
-				keys[SDLK_s] = true;
-				break;
-			case SDLK_d:
-				keys[SDLK_d] = true;
-				break;
-			case SDLK_ESCAPE:
-				engineState = EngineState::EXIT;
-			default:
-				break;
-			}
-			break;
-		case SDL_KEYUP:
-			switch (evnt.key.keysym.sym)
-			{
-			case SDLK_w:
-				keys[SDLK_w] = false;
-				break;
-			case SDLK_a:
-				keys[SDLK_a] = false;
-				break;
-			case SDLK_s:
-				keys[SDLK_s] = false;
-				break;
-			case SDLK_d:
-				keys[SDLK_d] = false;
-				break;
-			default:
-				break;
-			}
-			break;
-		}
+void Engine::updateKeysOnKeyDown(SDL_Event &event)
+{
+	switch (event.key.keysym.sym)
+	{
+	case SDLK_w:
+		inputKeys[SDLK_w] = true;
+		break;
+	case SDLK_a:
+		inputKeys[SDLK_a] = true;
+		break;
+	case SDLK_s:
+		inputKeys[SDLK_s] = true;
+		break;
+	case SDLK_d:
+		inputKeys[SDLK_d] = true;
+		break;
+	case SDLK_ESCAPE:
+		engineState = EngineState::EXIT;
+	default:
+		break;
 	}
 }
 
 
-void Engine::handleMovement()
+void Engine::handleMovementOnKeys()
 {
-	if (keys[SDLK_w])
+	if (inputKeys[SDLK_w])
 		camera->UpdatePosition(FORWARD, deltaTime);
-	if (keys[SDLK_a])
+	if (inputKeys[SDLK_a])
 		camera->UpdatePosition(LEFT, deltaTime);
-	if (keys[SDLK_s])
+	if (inputKeys[SDLK_s])
 		camera->UpdatePosition(BACKWARD, deltaTime);
-	if (keys[SDLK_d])
+	if (inputKeys[SDLK_d])
 		camera->UpdatePosition(RIGHT, deltaTime);
 }
 
@@ -433,7 +401,7 @@ void Engine::render()
 }
 
 
-void Engine::UpdateCamera(float deltaTime, glm::vec2 currMousePos)
+void Engine::updateCamera(float deltaTime, glm::vec2 currMousePos)
 {
 	float cameraRotationSpeed = 0.2f;
 	float heading = 0.0f;

@@ -181,9 +181,8 @@ void Camera::updateCamera()
 {
 	//glm::vec3 front;
 
-	//this->right = glm::normalize(glm::cross(this-> front, this->worldUp));
-	//
-	//this->up = glm::normalize(glm::cross(this->right, this->front));
+	this->right = glm::normalize(glm::cross(this-> front, this->worldUp));
+	this->up = glm::normalize(glm::cross(this->right, this->front));
 
 	
 }

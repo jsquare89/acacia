@@ -26,11 +26,18 @@ public:
 
 private:
 	void initSystems();
+	void initMouse();
+	void setupWindowSDL();
 	void initShaders();
 	void mainLoop();
+	void setDeltaTime();
+	void clearColorBuffer();
 	void handleInput();
-	void handleMovement();
-	void UpdateCamera(float deltaTime, glm::vec2 mousePos );
+	void handleInputOnEvent(SDL_Event &event);
+	void updateKeysOnKeyDown(SDL_Event &event);
+	void updateKeysOnKeyUp(SDL_Event &event);
+	void handleMovementOnKeys();
+	void updateCamera(float deltaTime, glm::vec2 mousePos );
 	void render();
 
 	SDL_Window* window;
@@ -42,24 +49,16 @@ private:
 
 	Object *triangle;
 
-
-	//Camera
 	Camera *camera;
 	glm::vec3 cameraPos;
 	glm::vec3 cameraUp;
 	glm::vec3 cameraFront;
-	GLfloat yaw;
-	GLfloat pitch;
-
-	//input
-	bool keys[1024];
-	//mouse 
-	GLfloat lastX, lastY;
-	bool firstMouse;
-
-	// time
+	GLfloat cameraYaw;
+	GLfloat cameraPitch;
+	bool inputKeys[1024];
+	GLfloat mouseLastX, mouseLastY;
 	GLfloat deltaTime = 0.0f;
-	GLfloat lastFrame = 0.0f;
+	GLfloat lastFrameTime = 0.0f;
 	GLfloat time;
 };
 
