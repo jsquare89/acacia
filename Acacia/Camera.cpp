@@ -6,19 +6,19 @@ const glm::vec3 WORLD_XAXIS(1.0f, 0.0f, 0.0f);
 const glm::vec3 WORLD_YAXIS(0.0f, 1.0f, 0.0f);
 const glm::vec3 WORLD_ZAXIS(0.0f, 0.0f, 1.0f);
 
-Camera::Camera() : position(glm::vec3(0.0f, 0.0f, 3.0f)),
-front(glm::vec3(0.0f, 0.0f, -1.0f)),
-up(glm::vec3(0.0f, 1.0f, 0.0f)),
-movementSpeed(5.0f),
-mouseSensitivity(0.002f),
-maxPitchRate( 5.0f),
-maxHeadingRate( 5.0f)
+Camera::Camera() :	position(glm::vec3(0.0f, 0.0f, 3.0f)),
+					front(glm::vec3(0.0f, 0.0f, -1.0f)),
+					up(glm::vec3(0.0f, 1.0f, 0.0f)),
+					movementSpeed(5.0f),
+					mouseSensitivity(0.002f),
+					maxPitchRate( 5.0f),
+					maxHeadingRate( 5.0f)
 {
 	this->worldUp = up;
 	//this->currentRotationX = 0;
 	verticalAngle = 0.0f;
 	horizontalAngle = 0.0f;
-	updateCamera();
+	SetNormRightUp();
 
 
 	// quaternion implemention
@@ -48,11 +48,26 @@ Camera::~Camera()
 {
 }
 
+void Camera::SetPerspective(float FieldOfViewDegrees, float aspectRatio, float nearClipDistance, float farClipDistance )
+{
+	projection = glm::perspective(glm::radians(FieldOfViewDegrees), aspectRatio, nearClipDistance, farClipDistance);
+}
+
+glm::mat4 Camera::GetPerspectiveMatrix()
+{
+	return projection;
+}
+
+void Camera::UpdateViewMatrix()
+{
+	view = glm::lookAt(this->position, this->position + this->front, this->up);
+}
+
 glm::mat4 Camera::GetViewMatrix()
 {
-	
-	return glm::lookAt(this->position, this->position + this->front, this->up);
+	return view;
 }
+
 
 void Camera::UpdateViewByMouse(SDL_Window &window, GLfloat deltaTime, GLfloat mouseX, GLfloat mouseY, GLfloat &lastMouseX, GLfloat &lastMouseY)
 {
@@ -107,7 +122,7 @@ void Camera::UpdateViewByMouse(SDL_Window &window, GLfloat deltaTime, GLfloat mo
 	////_heading *= .5;
 	////_pitch *= .5;
 	////camera_position_delta = camera_position_delta * .8f;
-
+	UpdateViewMatrix();
 }
 
 void Camera::Pitch(float angle)
@@ -175,16 +190,13 @@ void Camera::UpdatePosition(Camera_Movement direction, GLfloat deltaTime)
 		this->position -= this->right * velocity;
 	if (direction == RIGHT)
 		this->position += this->right * velocity;
+	UpdateViewMatrix();
 }
 
-void Camera::updateCamera()
+void Camera::SetNormRightUp()
 {
-	//glm::vec3 front;
-
 	this->right = glm::normalize(glm::cross(this-> front, this->worldUp));
 	this->up = glm::normalize(glm::cross(this->right, this->front));
-
-	
 }
 
 
@@ -276,6 +288,11 @@ void Camera::SetOrientation(const glm::quat &orientation)
 	
 }
 
+void Camera::Update()
+{
+	UpdateViewMatrix();
+}
+
 //void Camera::Move2D(int x, int y) {
 //	//compute the mouse delta from the previous mouse position
 //	glm::vec3 mouse_delta = mouse_position - glm::vec3(x, y, 0);
@@ -290,7 +307,7 @@ void Camera::SetOrientation(const glm::quat &orientation)
 //}
 
 
-void Camera::rotate(float headingDegrees, float pitchDegrees)
+void Camera::Rotate(float headingDegrees, float pitchDegrees)
 {
 	// Rotates the camera based on its current behavior.
 	// Note that not all behaviors support rolling.

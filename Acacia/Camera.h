@@ -23,7 +23,8 @@ public:
 
 
 
-
+	void Camera::SetPerspective(float FieldOfViewDegrees, float aspectRatio, float nearClip, float farClip);
+	glm::mat4 GetPerspectiveMatrix();
 	glm::mat4 GetViewMatrix();
 	void UpdateViewByMouse(SDL_Window &window, GLfloat detlaTime, GLfloat mouseX, GLfloat mouseY, GLfloat &lastMouseX, GLfloat &lastMouseY);
 	void UpdatePosition(Camera_Movement direction, GLfloat deltaTime);
@@ -31,13 +32,14 @@ public:
 	void RotateCamera(float headingDegrees, float pitchDegrees);
 	void RotateSmoothly(float headingDegrees, float pitchDegrees, float rollDegrees);
 
-	void rotate(float headingDegrees, float pitchDegrees);
+	void Rotate(float headingDegrees, float pitchDegrees);
 
 	void Pitch(float angle);
 	void Heading(float angle);
 	void Move2D(int x, int y);
 	void UpdateViewMatrix();
 	void SetOrientation(const glm::quat &orientation);
+	void Update();
 
 	glm::vec3 position;
 	glm::vec3 right;
@@ -47,8 +49,8 @@ public:
 	bool viewDirty = true;
 
 	//
-	glm::mat4 _view;
-	glm::mat4 _projection;
+	glm::mat4 view;
+	glm::mat4 projection;
 
 	float _pitch;
 	float _heading;
@@ -60,7 +62,6 @@ public:
 	glm::vec3 mousePos;
 
 	glm::vec3 worldUp;
-	glm::vec3 view;
 
 
 	GLfloat pitch;
@@ -95,7 +96,7 @@ public:
 	
 
 private:
-	void updateCamera();
+	void SetNormRightUp();
 
 };
 

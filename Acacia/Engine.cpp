@@ -7,11 +7,10 @@
 
 #include <SOIL\SOIL.h>
 
-Engine::Engine() : screenWidth(1024),
-screenHeight(768),
-time(0.0f),
-window(nullptr),
-engineState(EngineState::RUN)
+Engine::Engine() :	screenResolution{1024,768},
+					time(0.0f),
+					window(nullptr),
+					engineState(EngineState::RUN)
 {
 }
 
@@ -30,21 +29,28 @@ void Engine::initSystems()
 {
 	setupWindowSDL();
 	initShaders();
-	camera = new Camera();
+	initCamera();
 	initMouse();
+}
+
+void Engine::initCamera()
+{
+	camera = new Camera();
+	camera->SetPerspective(45.0f, (float)screenResolution.x / screenResolution.y, 0.1f, 100.0f);
 }
 
 void Engine::initMouse()
 {
-	mouseLastX = screenWidth / 2.0f;
-	mouseLastY = screenHeight / 2.0f;
+	
+	mouseLastPosition.x = screenResolution.x / 2.0f;
+	mouseLastPosition.y = screenResolution.y / 2.0f;
 }
 
 void Engine::setupWindowSDL()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_ShowCursor(SDL_DISABLE);
-	window = SDL_CreateWindow("Acacia Engine. Beta Version", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, SDL_WINDOW_OPENGL);
+	window = SDL_CreateWindow("Acacia Engine. Beta Version", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screenResolution.x, screenResolution.y, SDL_WINDOW_OPENGL);
 
 	if (window == nullptr)
 		fatalError("SDL Window could not be created!");
@@ -70,20 +76,12 @@ void Engine::initShaders()
 
 void Engine::mainLoop()
 {
-	// to refactor all of the opengl code
-	//GLfloat vertices[] = {
-	//	// Positions          // Colors           // Texture Coords
-	//	0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // Top Right
-	//	0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // Bottom Right
-	//	-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // Bottom Left
-	//	-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // Top Left 
-	//};
-	GLuint indices[] = {  // Note that we start from 0!
-		0, 1, 3,  // First Triangle
-		1, 2, 3   // Second Triangle
+	GLuint cubeIndices[] = {
+		0, 1, 3,
+		1, 2, 3
 	};
 
-	GLfloat vertices[] = {
+	GLfloat cubeVertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
 		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -148,10 +146,10 @@ void Engine::mainLoop()
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
 
 	// Position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
@@ -212,31 +210,14 @@ void Engine::mainLoop()
 
 	glEnable(GL_DEPTH_TEST);
 
-	//// Camera
-	//cameraPos	= glm::vec3(0.0f, 0.0f, 3.0f);
-	////glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-	////glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
-	////glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-	////glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-	//cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-	//cameraUp	= glm::vec3(0.0f, 1.0f, 0.0f);
-	//std::cout << "1. CameraFront: " << glm::to_string(cameraFront) << std::endl;
 
 	while (engineState != EngineState::EXIT)
 	{
 		setDeltaTime();
-		handleInput();
-		handleMovementOnKeys();
+		processUserInput();
+		processMovementOnKeys();
+		camera->Update();
 		clearColorBuffer();
-
-		//camera update
-		// view matrix
-		glm::mat4 view;
-		view = camera->GetViewMatrix();
-		//view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-		// projection matrix
-		glm::mat4 projection;
-		projection = glm::perspective(glm::radians(45.0f), (float)screenWidth /screenHeight, 0.1f, 100.0f);
 
 		// Draw our first triangle
 		program.use();
@@ -249,14 +230,9 @@ void Engine::mainLoop()
 		glBindTexture(GL_TEXTURE_2D, texture2);
 		glUniform1i(program.getUniformLocation("ourTexture2"), 1);
 		
-		// Create transformations
-		/*glm::mat4 trans;
-		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-		trans = glm::rotate(trans, glm::radians(_time*50.0f), glm::vec3(0.0, 0.0, 1.0));*/
-		//trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
 		// transform in vertex shader
-		glUniformMatrix4fv(program.getUniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(program.getUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(program.getUniformLocation("view"), 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
+		glUniformMatrix4fv(program.getUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(camera->GetPerspectiveMatrix()));
 
 		glBindVertexArray(VAO);
 		for (GLuint i = 0; i < 10; i++)
@@ -293,11 +269,9 @@ void Engine::clearColorBuffer()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Engine::handleInput()
+void Engine::processUserInput()
 {
-	GLfloat cameraSpeed = 0.05f;
 	SDL_Event event;
-
 	while (SDL_PollEvent(&event))
 	{
 		handleInputOnEvent(event);
@@ -312,7 +286,7 @@ void Engine::handleInputOnEvent(SDL_Event &event)
 		engineState = EngineState::EXIT;
 		break;
 	case SDL_MOUSEMOTION:
-		camera->UpdateViewByMouse(*window, deltaTime, event.motion.x, event.motion.y, mouseLastX, mouseLastY);
+		camera->UpdateViewByMouse(*window, deltaTime, event.motion.x, event.motion.y, mouseLastPosition.x, mouseLastPosition.y);
 		break;
 	case SDL_KEYDOWN:
 		updateKeysOnKeyDown(event);
@@ -368,7 +342,7 @@ void Engine::updateKeysOnKeyDown(SDL_Event &event)
 }
 
 
-void Engine::handleMovementOnKeys()
+void Engine::processMovementOnKeys()
 {
 	if (inputKeys[SDLK_w])
 		camera->UpdatePosition(FORWARD, deltaTime);
@@ -412,7 +386,7 @@ void Engine::updateCamera(float deltaTime, glm::vec2 currMousePos)
 	//
 	//	GetMovementDirection(direction);
 
-	glm::vec2 windowCenterPos = { screenWidth / 2, screenHeight / 2 }; // make global
+	glm::vec2 windowCenterPos = { screenResolution.x / 2, screenResolution.y / 2 }; // make global
 	glm::vec2 mouseDistanceFromCenter = { currMousePos.x - windowCenterPos.x, windowCenterPos.y - currMousePos.y };
 
 
@@ -430,4 +404,3 @@ void Engine::updateCamera(float deltaTime, glm::vec2 currMousePos)
 	SDL_WarpMouseInWindow(window, windowCenterPos.x, windowCenterPos.y);
 
 }
-

@@ -14,6 +14,8 @@
 #include <glm/ext.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+
+
 enum class EngineState{RUN, EXIT};
 
 class Engine
@@ -26,23 +28,23 @@ public:
 
 private:
 	void initSystems();
+	void initCamera();
 	void initMouse();
 	void setupWindowSDL();
 	void initShaders();
 	void mainLoop();
 	void setDeltaTime();
 	void clearColorBuffer();
-	void handleInput();
+	void processUserInput();
 	void handleInputOnEvent(SDL_Event &event);
 	void updateKeysOnKeyDown(SDL_Event &event);
 	void updateKeysOnKeyUp(SDL_Event &event);
-	void handleMovementOnKeys();
+	void processMovementOnKeys();
 	void updateCamera(float deltaTime, glm::vec2 mousePos );
 	void render();
 
 	SDL_Window* window;
-	uint32_t screenWidth;
-	uint32_t screenHeight;
+	glm::uvec2 screenResolution;
 	EngineState engineState;
 	
 	GLSLProgram program;
@@ -55,8 +57,8 @@ private:
 	glm::vec3 cameraFront;
 	GLfloat cameraYaw;
 	GLfloat cameraPitch;
-	bool inputKeys[1024];
-	GLfloat mouseLastX, mouseLastY;
+	bool inputKeys[1024]; 
+	glm::vec2 mouseLastPosition;
 	GLfloat deltaTime = 0.0f;
 	GLfloat lastFrameTime = 0.0f;
 	GLfloat time;
