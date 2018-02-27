@@ -25,31 +25,35 @@ public:
 	glm::mat4 getView();
 	void Camera::setPerspective(float FieldOfViewDegrees, float aspectRatio, float nearClip, float farClip);
 	
-	void UpdateYawPitchByMouse(SDL_Window &window, SDL_MouseMotionEvent &mme, glm::uvec2 prevMouse);
+	void UpdateYawPitchByMouse(SDL_Window &window, SDL_MouseMotionEvent &mme);
+	void move(float dx, float dy, float dz);
+	void move(const glm::vec3 & direction, const glm::vec3 & amount);
+	void setPosition(const glm::vec3 & position);
 	void UpdatePosition(Camera_Movement direction, GLfloat deltaTime);
 	void RotateCamera(float headingDegrees, float pitchDegrees);
 	void RotateSmoothly(float headingDegrees, float pitchDegrees, float rollDegrees);
 
 	void rotate(float headingDegrees, float pitchDegrees);
 
-	void constrainPitch(float pitchDegrees);
+	void constrainPitch();
 
 	void Pitch(float angle);
 	void Heading(float angle);
 	
 	void SetOrientation(const glm::quat &orientation);
-	void Update();
+	void update();
 
 	
 
 private:
+	void updateRotationOfView();
 	void updateView();
 	void SetNormRightUp();
 
-	glm::vec3 position;
+	glm::vec3 eye;
 	glm::vec3 right;
 	glm::vec3 up;
-	glm::vec3 front;
+	glm::vec3 forward;
 
 	bool viewDirty = true;
 
@@ -70,8 +74,8 @@ private:
 	glm::vec3 worldUp;
 
 
-	float pitch;
-	float yaw;
+	float pitchRadians;
+	float yawRadians;
 	GLfloat roll;
 
 	GLfloat movementSpeed;

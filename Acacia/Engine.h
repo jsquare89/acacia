@@ -30,17 +30,16 @@ private:
 	void initSystems();
 	void initCamera();
 	void initMouse();
-	void setupWindowSDL();
+	void initSDLWindow();
 	void initShaders();
 	void mainLoop();
-	void setDeltaTime();
+	void updateDeltaTime();
 	void clearColorBuffer();
 	void processUserInput();
 	void handleInputOnEvent(SDL_Event &event);
 	void updateKeysOnKeyDown(SDL_Event &event);
 	void updateKeysOnKeyUp(SDL_Event &event);
 	void processMovementOnKeys();
-	void updateCamera(float deltaTime, glm::vec2 mousePos );
 	void render();
 
 	SDL_Window* window;

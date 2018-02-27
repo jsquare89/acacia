@@ -1,13 +1,15 @@
 #include "stdafx.h"
 #include "Camera.h"
 
+
 const GLfloat DEFAULT_FOV = 90.0f;
 const glm::vec3 WORLD_XAXIS(1.0f, 0.0f, 0.0f);
 const glm::vec3 WORLD_YAXIS(0.0f, 1.0f, 0.0f);
 const glm::vec3 WORLD_ZAXIS(0.0f, 0.0f, 1.0f);
+const float NINETY_DEGREE_IN_RADIANS = 1.5708;
 
-Camera::Camera() :	position(glm::vec3(0.0f, 0.0f, 3.0f)),
-					front(glm::vec3(0.0f, 0.0f, -1.0f)),
+Camera::Camera() :	eye(glm::vec3(0.0f, 0.0f, 3.0f)),
+					forward(glm::vec3(0.0f, 0.0f, -1.0f)),
 					up(glm::vec3(0.0f, 1.0f, 0.0f)),
 					movementSpeed(5.0f),
 					cameraRotationSpeed(0.002f),
@@ -19,8 +21,8 @@ Camera::Camera() :	position(glm::vec3(0.0f, 0.0f, 3.0f)),
 	verticalAngle = 0.0f;
 	horizontalAngle = 0.0f;
 	SetNormRightUp();
-	yaw = 0.0f;
-	pitch = 0.0f;
+	yawRadians = 0.0f;
+	pitchRadians = 0.0f;
 	orientation = glm::quat();
 	// quaternion implemention
 	_eye = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -59,25 +61,23 @@ glm::mat4 Camera::getPerspective()
 	return projection;
 }
 
-void Camera::updateView()
+void Camera::updateRotationOfView()
 {
-	//view = glm::lookAt(this->position, this->position + this->front, this->up);
-
-	//glm::quat key_quat = glm::quat(glm::vec3(pitch, yaw, roll));
-	
-	glm::quat qPitch = glm::angleAxis(pitch, glm::vec3(1, 0, 0));
-	glm::quat qYaw = glm::angleAxis(yaw, glm::vec3(0, 1, 0));
-	
+	glm::quat qPitch = glm::angleAxis(pitchRadians, glm::vec3(1, 0, 0));
+	glm::quat qYaw = glm::angleAxis(yawRadians, glm::vec3(0, 1, 0));
 	orientation = qPitch * qYaw;
 	orientation = glm::normalize(orientation);
+	glm::mat4 rotatation = glm::mat4_cast(orientation);
+	glm::mat4 translatation = glm::mat4(1.0f);
+	translatation = glm::translate(translatation, -eye);
+	view = rotatation * translatation;
+}
 
-	glm::mat4 rota = glm::mat4_cast(orientation);
-	glm::mat4 translate = glm::mat4(1.0f);
-	translate = glm::translate(translate, -position);
+void Camera::updateView()
+{
+	updateRotationOfView();
 
-	view = rota * translate;
 
-	//orientation = glm::quat_cast(view);
 }
 
 glm::mat4 Camera::getView()
@@ -86,88 +86,78 @@ glm::mat4 Camera::getView()
 }
 
 
-void Camera::UpdateYawPitchByMouse(SDL_Window &window, SDL_MouseMotionEvent &mme, glm::uvec2 prevMouse)
+void Camera::UpdateYawPitchByMouse(SDL_Window &window, SDL_MouseMotionEvent &mme)
 {
-	int xDistanceFromWindowCenter =  mme.xrel - prevMouse.x ;
-	int yDistanceFromWindowCenter = prevMouse.x - mme.yrel  ;
-	yaw += (float)mme.xrel * cameraRotationSpeed;
-	pitch += (float)mme.yrel * cameraRotationSpeed;
-	printf("yaw:%f  pitch:%f", yaw, pitch);
+	yawRadians += (float)mme.xrel * cameraRotationSpeed;
+	pitchRadians += (float)mme.yrel * cameraRotationSpeed;
+	constrainPitch();
+	printf("pitch:%f yaw:%f\n", pitchRadians, yawRadians);
+}
 
-	//SDL_WarpMouseInWindow(&window, 1024 / 2, 768 / 2);
+
+void Camera::move(float dx, float dy, float dz)
+{
+	glm::vec3 eye = this->eye;
+	glm::vec3 forwards;
+
+	forwards = glm::cross(WORLD_YAXIS, _xAxis);
+	forwards = glm::normalize(forwards);
+
+	eye += _xAxis * dx;
+	eye += WORLD_YAXIS * dy;
+	eye += forwards * dz;
+
+	setPosition(eye);
+}
+void Camera::move(const glm::vec3 &direction, const glm::vec3 &amount)
+{
+	eye.x += direction.x * amount.x;
+	eye.y += direction.y * amount.y;
+	eye.z += direction.z * amount.z;
+
+	updateRotationOfView();
+}
+
+void Camera::setPosition(const glm::vec3 &position)
+{
+	this->eye = position;
+	updateRotationOfView();
 }
 
 void Camera::UpdatePosition(Camera_Movement direction, GLfloat deltaTime)
 {
 	GLfloat velocity = this->movementSpeed * deltaTime;
 	if (direction == FORWARD)
-		this->position += this->front * velocity;
+		this->eye += this->forward * velocity;
 	if (direction == BACKWARD)
-		this->position -= this->front * velocity;
+		this->eye -= this->forward * velocity;
 	if (direction == LEFT)
-		this->position -= this->right * velocity;
+		this->eye -= this->right * velocity;
 	if (direction == RIGHT)
-		this->position += this->right * velocity;
-	updateView();
+		this->eye += this->right * velocity;
 }
 
 void Camera::SetNormRightUp()
 {
-	this->right = glm::normalize(glm::cross(this-> front, this->worldUp));
-	this->up = glm::normalize(glm::cross(this->right, this->front));
+	this->right = glm::normalize(glm::cross(this-> forward, this->worldUp));
+	this->up = glm::normalize(glm::cross(this->right, this->forward));
 }
 
 
-void Camera::Update()
+void Camera::update()
 {
+	updateRotationOfView();
 	updateView();
 }
 
-void Camera::rotate(float yawDegrees, float pitchDegrees)
+void Camera::constrainPitch()
 {
-	// Rotates the camera based on its current behavior.
-	// Note that not all behaviors support rolling.
-
-	pitchDegrees = -pitchDegrees;
-	yawDegrees = -yawDegrees;
-	// Implements the rotation logic for the first person style and
-	// spectator style camera behaviors. Roll is ignored.
-
-	constrainPitch(pitchDegrees);
-
-	glm::quat rotate;
-	// Rotate camera about the world y axis.
-	if (yaw != 0.0f)
+	if (pitchRadians > NINETY_DEGREE_IN_RADIANS)
 	{
-		rotate = glm::angleAxis(yaw, WORLD_YAXIS);
-		orientation = glm::cross(orientation, rotate);
+		pitchRadians = NINETY_DEGREE_IN_RADIANS;
 	}
-
-	// Rotate camera about its local x axis.
-	if (pitch != 0.0f)
+	if (pitchRadians < -NINETY_DEGREE_IN_RADIANS)
 	{
-		rotate = glm::angleAxis(pitch, WORLD_XAXIS);
-		orientation = glm::cross(orientation, rotate);
-		int i = 0;
-	}
-
-	view = glm::toMat4(orientation);
-
-}
-
-void Camera::constrainPitch(float pitchDegrees)
-{
-	_accumPitchDegrees += pitchDegrees;
-
-	if (_accumPitchDegrees > 90.0f)
-	{
-		pitch = 90.0f - (_accumPitchDegrees - pitchDegrees);
-		_accumPitchDegrees = 90.0f;
-	}
-
-	if (_accumPitchDegrees < -90.0f)
-	{
-		pitch = -90.0f - (_accumPitchDegrees - pitchDegrees);
-		_accumPitchDegrees = -90.0f;
+		pitchRadians = -NINETY_DEGREE_IN_RADIANS;
 	}
 }

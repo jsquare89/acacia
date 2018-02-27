@@ -27,7 +27,7 @@ void Engine::run()
 
 void Engine::initSystems()
 {
-	setupWindowSDL();
+	initSDLWindow();
 	initShaders();
 	initCamera();
 	initMouse();
@@ -45,26 +45,19 @@ void Engine::initMouse()
 	mouseCurrentPosition.y = 0;
 }
 
-void Engine::setupWindowSDL()
+void Engine::initSDLWindow()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
-	//SDL_ShowCursor(SDL_ENABLE);
-	//SDL_WarpMouseInWindow(window, 1024 / 2, 768 / 2);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
-
 	window = SDL_CreateWindow("Acacia Engine. Beta Version", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screenResolution.x, screenResolution.y, SDL_WINDOW_OPENGL);
-
 	if (window == nullptr)
 		fatalError("SDL Window could not be created!");
-
 	SDL_GLContext glContext = SDL_GL_CreateContext(window);
 	if (glContext == nullptr)
 		fatalError("SDL_GL context could not be created!");
-
 	GLenum error = glewInit();
 	if (error != GLEW_OK)
 		fatalError("Could not initialize glew!");
-
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 }
@@ -72,7 +65,6 @@ void Engine::setupWindowSDL()
 void Engine::initShaders()
 {
 	program.compileShaders("Shaders/colorShading.vert", "Shaders/colorShading.frag");
-	//_program.addAttribute("position");
 	program.linkShaders();
 }
 
@@ -215,12 +207,10 @@ void Engine::mainLoop()
 
 	while (engineState != EngineState::EXIT)
 	{
-		setDeltaTime();
+		updateDeltaTime();
 		processUserInput();
 		processMovementOnKeys();
-
-		
-		camera->Update();
+		camera->update();
 
 		clearColorBuffer();
 
@@ -260,7 +250,7 @@ void Engine::mainLoop()
 
 }
 
-void Engine::setDeltaTime()
+void Engine::updateDeltaTime()
 {
 	time = SDL_GetTicks() / 1000.0f; // time in seconds
 	GLfloat currentFrame = time;
@@ -276,7 +266,6 @@ void Engine::clearColorBuffer()
 
 void Engine::processUserInput()
 {
-	
 	while (SDL_PollEvent(&event))
 	{
 		handleInputOnEvent(event);
@@ -291,11 +280,7 @@ void Engine::handleInputOnEvent(SDL_Event &event)
 		engineState = EngineState::EXIT;
 		break;
 	case SDL_MOUSEMOTION:
-		
-		camera->UpdateYawPitchByMouse(*window, event.motion, mouseCurrentPosition );
-		printf("x:%i, y:%i\nprevposition x:%i, y:%i\n", event.motion.xrel, event.motion.yrel, mouseCurrentPosition.x, mouseCurrentPosition.y);
-		mouseCurrentPosition.x = event.motion.xrel;
-		mouseCurrentPosition.y = event.motion.yrel;
+		camera->UpdateYawPitchByMouse(*window, event.motion);
 		break;
 	case SDL_KEYDOWN:
 		updateKeysOnKeyDown(event);
