@@ -36,20 +36,23 @@ void Engine::initSystems()
 void Engine::initCamera()
 {
 	camera = new Camera();
-	camera->SetPerspective(45.0f, (float)screenResolution.x / screenResolution.y, 0.1f, 100.0f);
+	camera->setPerspective(70.0f, (float)screenResolution.x / screenResolution.y, 0.1f, 100.0f);
 }
 
 void Engine::initMouse()
 {
-	
-	mouseLastPosition.x = screenResolution.x / 2.0f;
-	mouseLastPosition.y = screenResolution.y / 2.0f;
+	mouseCurrentPosition.x = 0;
+	mouseCurrentPosition.y = 0;
 }
 
 void Engine::setupWindowSDL()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_ShowCursor(SDL_DISABLE);
+	SDL_ShowCursor(SDL_ENABLE);
+	//SDL_WarpMouseInWindow(window, 1024 / 2, 768 / 2);
+	SDL_SetWindowGrab(window, SDL_TRUE);
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+
 	window = SDL_CreateWindow("Acacia Engine. Beta Version", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screenResolution.x, screenResolution.y, SDL_WINDOW_OPENGL);
 
 	if (window == nullptr)
@@ -216,7 +219,10 @@ void Engine::mainLoop()
 		setDeltaTime();
 		processUserInput();
 		processMovementOnKeys();
+
+		
 		camera->Update();
+
 		clearColorBuffer();
 
 		// Draw our first triangle
@@ -231,8 +237,8 @@ void Engine::mainLoop()
 		glUniform1i(program.getUniformLocation("ourTexture2"), 1);
 		
 		// transform in vertex shader
-		glUniformMatrix4fv(program.getUniformLocation("view"), 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
-		glUniformMatrix4fv(program.getUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(camera->GetPerspectiveMatrix()));
+		glUniformMatrix4fv(program.getUniformLocation("view"), 1, GL_FALSE, glm::value_ptr(camera->getView()));
+		glUniformMatrix4fv(program.getUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(camera->getPerspective()));
 
 		glBindVertexArray(VAO);
 		for (GLuint i = 0; i < 10; i++)
@@ -271,7 +277,7 @@ void Engine::clearColorBuffer()
 
 void Engine::processUserInput()
 {
-	SDL_Event event;
+	
 	while (SDL_PollEvent(&event))
 	{
 		handleInputOnEvent(event);
@@ -286,7 +292,10 @@ void Engine::handleInputOnEvent(SDL_Event &event)
 		engineState = EngineState::EXIT;
 		break;
 	case SDL_MOUSEMOTION:
-		camera->UpdateViewByMouse(*window, deltaTime, event.motion.x, event.motion.y, mouseLastPosition.x, mouseLastPosition.y);
+		/*mouseCurrentPosition.x = event.motion.xrel;
+		mouseCurrentPosition.y = event.motion.yrel;*/
+		camera->UpdateViewByMouse(*window, event.motion);
+		printf("x:%i, y:%i\n", event.motion.x, event.motion.y);
 		break;
 	case SDL_KEYDOWN:
 		updateKeysOnKeyDown(event);
@@ -375,32 +384,3 @@ void Engine::render()
 }
 
 
-void Engine::updateCamera(float deltaTime, glm::vec2 currMousePos)
-{
-	float cameraRotationSpeed = 0.2f;
-	float heading = 0.0f;
-	float pitch = 0.0f;
-	glm::vec3 dir;
-	
-	//	Mouse &mouse = Mouse::instance();
-	//
-	//	GetMovementDirection(direction);
-
-	glm::vec2 windowCenterPos = { screenResolution.x / 2, screenResolution.y / 2 }; // make global
-	glm::vec2 mouseDistanceFromCenter = { currMousePos.x - windowCenterPos.x, windowCenterPos.y - currMousePos.y };
-
-
-	// First Person Camera update
-	pitch = mouseDistanceFromCenter.y  * cameraRotationSpeed;
-	heading = mouseDistanceFromCenter.x * cameraRotationSpeed;
-
-
-	//g_camera.rotate(heading, pitch, 0.0f);
-
-	//	g_camera.updatePosition(direction, elapsedTimeSec);
-	//	PerformCameraCollisionDetection();
-	//
-	//	mouse.moveToWindowCenter();
-	SDL_WarpMouseInWindow(window, windowCenterPos.x, windowCenterPos.y);
-
-}

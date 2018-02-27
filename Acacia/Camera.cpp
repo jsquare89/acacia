@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Camera.h"
 
-
+const GLfloat DEFAULT_FOV = 90.0f;
 const glm::vec3 WORLD_XAXIS(1.0f, 0.0f, 0.0f);
 const glm::vec3 WORLD_YAXIS(0.0f, 1.0f, 0.0f);
 const glm::vec3 WORLD_ZAXIS(0.0f, 0.0f, 1.0f);
@@ -10,7 +10,7 @@ Camera::Camera() :	position(glm::vec3(0.0f, 0.0f, 3.0f)),
 					front(glm::vec3(0.0f, 0.0f, -1.0f)),
 					up(glm::vec3(0.0f, 1.0f, 0.0f)),
 					movementSpeed(5.0f),
-					mouseSensitivity(0.002f),
+					cameraRotationSpeed(0.002f),
 					maxPitchRate( 5.0f),
 					maxHeadingRate( 5.0f)
 {
@@ -20,7 +20,7 @@ Camera::Camera() :	position(glm::vec3(0.0f, 0.0f, 3.0f)),
 	horizontalAngle = 0.0f;
 	SetNormRightUp();
 
-
+	orientation = glm::quat();
 	// quaternion implemention
 	_eye = glm::vec3(0.0f, 0.0f, 3.0f);
 	_savedEye = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -48,81 +48,52 @@ Camera::~Camera()
 {
 }
 
-void Camera::SetPerspective(float FieldOfViewDegrees, float aspectRatio, float nearClipDistance, float farClipDistance )
+void Camera::setPerspective(float fieldOfViewDegrees, float aspectRatio, float nearClipDistance, float farClipDistance )
 {
-	projection = glm::perspective(glm::radians(FieldOfViewDegrees), aspectRatio, nearClipDistance, farClipDistance);
+	projection = glm::perspective(glm::radians(fieldOfViewDegrees), aspectRatio, nearClipDistance, farClipDistance);
 }
 
-glm::mat4 Camera::GetPerspectiveMatrix()
+glm::mat4 Camera::getPerspective()
 {
 	return projection;
 }
 
-void Camera::UpdateViewMatrix()
+void Camera::updateView()
 {
-	view = glm::lookAt(this->position, this->position + this->front, this->up);
+	//view = glm::lookAt(this->position, this->position + this->front, this->up);
+
+	//glm::quat key_quat = glm::quat(glm::vec3(pitch, yaw, roll));
+	
+	glm::quat qPitch = glm::angleAxis(pitch, glm::vec3(-1, 0, 0));
+	glm::quat qYaw = glm::angleAxis(yaw, glm::vec3(0, 1, 0));
+	
+	orientation = qPitch * qYaw;
+	orientation = glm::normalize(orientation);
+
+	glm::mat4 rota = glm::mat4_cast(orientation);
+	glm::mat4 translate = glm::mat4(1.0f);
+	translate = glm::translate(translate, -position);
+
+	view = rota * translate;
+
+	//orientation = glm::quat_cast(view);
 }
 
-glm::mat4 Camera::GetViewMatrix()
+glm::mat4 Camera::getView()
 {
 	return view;
 }
 
 
-void Camera::UpdateViewByMouse(SDL_Window &window, GLfloat deltaTime, GLfloat mouseX, GLfloat mouseY, GLfloat &lastMouseX, GLfloat &lastMouseY)
+void Camera::UpdateViewByMouse(SDL_Window &window, SDL_MouseMotionEvent &mme)
 {
-	//SDL_WarpMouseInWindow(&window, 1024 / 2, 768 / 2);
+	
+	float xDistanceFromWindowCenter = mme.x- ((float)1024 / 2) ;
+	float yDistanceFromWindowCenter = ((float)720 / 2) - mme.y;
+	yaw = xDistanceFromWindowCenter * cameraRotationSpeed;
+	pitch = yDistanceFromWindowCenter * cameraRotationSpeed;
 
-	pitch = ( mouseY - float(1024 / 2)) * mouseSensitivity;
-	yaw = (mouseX - float(768 / 2)) * mouseSensitivity;
-	//horizontalAngle += mouseSensitivity * deltaTime * float(1024 / 2 - mouseX);
-	//verticalAngle += mouseSensitivity * deltaTime * float(768/2 - mouseY) ;
-
-	//front = glm::vec3(
-	//	cos(verticalAngle) * sin(horizontalAngle),
-	//	sin(verticalAngle),
-	//	cos(verticalAngle)*cos(horizontalAngle));
-
-	//right = glm::vec3(
-	//	sin(horizontalAngle - 3.14f / 2.0f),
-	//	0.0f,
-	//	cos(horizontalAngle - 3.14f / 2.0f));
-
-	//up = glm::cross(right, front);
-
-	//RotateSmoothly(yaw, pitch, 0.0f);
-
-	// move mouse back to center of the window
 	SDL_WarpMouseInWindow(&window, 1024 / 2, 768 / 2);
-
-	//float dx = lastMouseX - mouseX;
-	//float dy = lastMouseY - mouseY;
-	//Heading(horizontalAngle);
-	//Pitch(verticalAngle);
-
-
-	//
-	//
-	//glm::vec3 axis = glm::cross(front, up);
-	////compute quaternion for pitch based on the camera pitch angle
-	//glm::quat pitch_quat = glm::angleAxis(_pitch, axis);
-	////determine heading quaternion from the camera up vector and the heading angle
-	//glm::quat heading_quat = glm::angleAxis(_heading, up);
-	////add the two quaternions
-	//glm::quat temp = glm::cross(pitch_quat, heading_quat);
-	//temp = glm::normalize(temp);
-	////update the direction from the quaternion
-	//front = glm::rotate(temp, front);
-	//front = glm::normalize(front);
-	////add the camera delta
-	//////position += camera_position_delta;
-	////set the look at to be infront of the camera
-	////camera_look_at = camera_position + camera_direction * 1.0f;
-	////damping for smooth camera
-	////_heading *= .5;
-	////_pitch *= .5;
-	////camera_position_delta = camera_position_delta * .8f;
-	UpdateViewMatrix();
 }
 
 void Camera::Pitch(float angle)
@@ -190,7 +161,7 @@ void Camera::UpdatePosition(Camera_Movement direction, GLfloat deltaTime)
 		this->position -= this->right * velocity;
 	if (direction == RIGHT)
 		this->position += this->right * velocity;
-	UpdateViewMatrix();
+	updateView();
 }
 
 void Camera::SetNormRightUp()
@@ -290,7 +261,7 @@ void Camera::SetOrientation(const glm::quat &orientation)
 
 void Camera::Update()
 {
-	UpdateViewMatrix();
+	updateView();
 }
 
 //void Camera::Move2D(int x, int y) {
@@ -307,29 +278,51 @@ void Camera::Update()
 //}
 
 
-void Camera::Rotate(float headingDegrees, float pitchDegrees)
+void Camera::rotate(float yawDegrees, float pitchDegrees)
 {
 	// Rotates the camera based on its current behavior.
 	// Note that not all behaviors support rolling.
 
 	pitchDegrees = -pitchDegrees;
-	headingDegrees = -headingDegrees;
-
+	yawDegrees = -yawDegrees;
 	// Implements the rotation logic for the first person style and
 	// spectator style camera behaviors. Roll is ignored.
 
+	constrainPitch(pitchDegrees);
+
+	glm::quat rotate;
+	// Rotate camera about the world y axis.
+	if (yaw != 0.0f)
+	{
+		rotate = glm::angleAxis(yaw, WORLD_YAXIS);
+		orientation = glm::cross(orientation, rotate);
+	}
+
+	// Rotate camera about its local x axis.
+	if (pitch != 0.0f)
+	{
+		rotate = glm::angleAxis(pitch, WORLD_XAXIS);
+		orientation = glm::cross(orientation, rotate);
+		int i = 0;
+	}
+
+	view = glm::toMat4(orientation);
+
+}
+
+void Camera::constrainPitch(float pitchDegrees)
+{
 	_accumPitchDegrees += pitchDegrees;
 
 	if (_accumPitchDegrees > 90.0f)
 	{
-		pitchDegrees = 90.0f - (_accumPitchDegrees - pitchDegrees);
+		pitch = 90.0f - (_accumPitchDegrees - pitchDegrees);
 		_accumPitchDegrees = 90.0f;
 	}
 
 	if (_accumPitchDegrees < -90.0f)
 	{
-		pitchDegrees = -90.0f - (_accumPitchDegrees - pitchDegrees);
+		pitch = -90.0f - (_accumPitchDegrees - pitchDegrees);
 		_accumPitchDegrees = -90.0f;
 	}
-
 }

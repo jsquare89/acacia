@@ -58,9 +58,10 @@ private:
 	GLfloat cameraYaw;
 	GLfloat cameraPitch;
 	bool inputKeys[1024]; 
-	glm::vec2 mouseLastPosition;
+	glm::vec2 mouseCurrentPosition;
 	GLfloat deltaTime = 0.0f;
 	GLfloat lastFrameTime = 0.0f;
 	GLfloat time;
+	SDL_Event event;
 };
 

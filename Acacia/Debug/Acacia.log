@@ -1,7 +1,2 @@
 ﻿  Engine.cpp
-c:\users\jarred\documents\github\acacia\acacia\engine.cpp(289): warning C4244: 'argument': conversion from 'Sint32' to 'GLfloat', possible loss of data
-c:\users\jarred\documents\github\acacia\acacia\engine.cpp(404): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-  Generating Code...
-  Skipping... (no relevant changes detected)
-  main.cpp
   Acacia.vcxproj -> C:\Users\Jarred\Documents\GitHub\acacia\Debug\Acacia.exe

@@ -21,25 +21,30 @@ public:
 	Camera();
 	~Camera();
 
-
-
-	void Camera::SetPerspective(float FieldOfViewDegrees, float aspectRatio, float nearClip, float farClip);
-	glm::mat4 GetPerspectiveMatrix();
-	glm::mat4 GetViewMatrix();
-	void UpdateViewByMouse(SDL_Window &window, GLfloat detlaTime, GLfloat mouseX, GLfloat mouseY, GLfloat &lastMouseX, GLfloat &lastMouseY);
+	glm::mat4 getPerspective();
+	glm::mat4 getView();
+	void Camera::setPerspective(float FieldOfViewDegrees, float aspectRatio, float nearClip, float farClip);
+	
+	void UpdateViewByMouse(SDL_Window &window, SDL_MouseMotionEvent &mme);
 	void UpdatePosition(Camera_Movement direction, GLfloat deltaTime);
-	//void RotateCamera(GLfloat Angle, GLfloat x, GLfloat y, GLfloat z);
 	void RotateCamera(float headingDegrees, float pitchDegrees);
 	void RotateSmoothly(float headingDegrees, float pitchDegrees, float rollDegrees);
 
-	void Rotate(float headingDegrees, float pitchDegrees);
+	void rotate(float headingDegrees, float pitchDegrees);
+
+	void constrainPitch(float pitchDegrees);
 
 	void Pitch(float angle);
 	void Heading(float angle);
-	void Move2D(int x, int y);
-	void UpdateViewMatrix();
+	
 	void SetOrientation(const glm::quat &orientation);
 	void Update();
+
+	
+
+private:
+	void updateView();
+	void SetNormRightUp();
 
 	glm::vec3 position;
 	glm::vec3 right;
@@ -48,7 +53,6 @@ public:
 
 	bool viewDirty = true;
 
-	//
 	glm::mat4 view;
 	glm::mat4 projection;
 
@@ -57,6 +61,8 @@ public:
 
 	float maxPitchRate;
 	float maxHeadingRate;
+
+	glm::quat orientation;
 
 	glm::quat rotationQuat;
 	glm::vec3 mousePos;
@@ -69,7 +75,7 @@ public:
 	GLfloat roll;
 
 	GLfloat movementSpeed;
-	GLfloat mouseSensitivity;
+	GLfloat cameraRotationSpeed;
 	glm::vec2 mousePosition;
 
 	//GLfloat currentRotationX;
@@ -93,10 +99,8 @@ public:
 	glm::vec3 _currentVelocity;
 	glm::vec3 _velocity;
 
-	
 
-private:
-	void SetNormRightUp();
+	
 
 };
 
