@@ -7,17 +7,17 @@
 
 #include <SOIL\SOIL.h>
 
-Engine::Engine() : screenWidth(1024),
-screenHeight(768),
-time(0.0f),
-window(nullptr),
-engineState(EngineState::RUN)
+Engine::Engine() :	screenResolution{1024,768},
+					time(0.0f),
+					window(nullptr),
+					engineState(ENGINE_STATE::RUN)
 {
 }
 
 Engine::~Engine()
 {
 	delete camera;
+	delete input;
 }
 
 void Engine::run()
@@ -28,35 +28,32 @@ void Engine::run()
 
 void Engine::initSystems()
 {
-	setupWindowSDL();
+	initSDLWindow();
 	initShaders();
-	camera = new Camera();
-	initMouse();
+	initCamera();
+	input = new Input();
 }
 
-void Engine::initMouse()
+void Engine::initCamera()
 {
-	mouseLastX = screenWidth / 2.0f;
-	mouseLastY = screenHeight / 2.0f;
+	camera = new Camera();
+	camera->setPerspective(70.0f, (float)screenResolution.x / screenResolution.y, 0.1f, 100.0f);
 }
 
-void Engine::setupWindowSDL()
+
+void Engine::initSDLWindow()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_ShowCursor(SDL_DISABLE);
-	window = SDL_CreateWindow("Acacia Engine. Beta Version", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, SDL_WINDOW_OPENGL);
-
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	window = SDL_CreateWindow("Acacia Engine. Beta Version", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screenResolution.x, screenResolution.y, SDL_WINDOW_OPENGL);
 	if (window == nullptr)
 		fatalError("SDL Window could not be created!");
-
 	SDL_GLContext glContext = SDL_GL_CreateContext(window);
 	if (glContext == nullptr)
 		fatalError("SDL_GL context could not be created!");
-
 	GLenum error = glewInit();
 	if (error != GLEW_OK)
 		fatalError("Could not initialize glew!");
-
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 }
@@ -64,26 +61,17 @@ void Engine::setupWindowSDL()
 void Engine::initShaders()
 {
 	program.compileShaders("Shaders/colorShading.vert", "Shaders/colorShading.frag");
-	//_program.addAttribute("position");
 	program.linkShaders();
 }
 
 void Engine::mainLoop()
 {
-	// to refactor all of the opengl code
-	//GLfloat vertices[] = {
-	//	// Positions          // Colors           // Texture Coords
-	//	0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // Top Right
-	//	0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // Bottom Right
-	//	-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // Bottom Left
-	//	-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // Top Left 
-	//};
-	GLuint indices[] = {  // Note that we start from 0!
-		0, 1, 3,  // First Triangle
-		1, 2, 3   // Second Triangle
+	GLuint cubeIndices[] = {
+		0, 1, 3,
+		1, 2, 3
 	};
 
-	GLfloat vertices[] = {
+	GLfloat cubeVertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
 		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -148,10 +136,10 @@ void Engine::mainLoop()
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
 
 	// Position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
@@ -212,31 +200,18 @@ void Engine::mainLoop()
 
 	glEnable(GL_DEPTH_TEST);
 
-	//// Camera
-	//cameraPos	= glm::vec3(0.0f, 0.0f, 3.0f);
-	////glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-	////glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
-	////glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-	////glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-	//cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-	//cameraUp	= glm::vec3(0.0f, 1.0f, 0.0f);
-	//std::cout << "1. CameraFront: " << glm::to_string(cameraFront) << std::endl;
 
-	while (engineState != EngineState::EXIT)
+	while (engineState != ENGINE_STATE::EXIT)
 	{
-		setDeltaTime();
-		handleInput();
-		handleMovementOnKeys();
-		clearColorBuffer();
+		updateDeltaTime();
+		input->process(event);
+		processCameraMovement();
 
-		//camera update
-		// view matrix
-		glm::mat4 view;
-		view = camera->GetViewMatrix();
-		//view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-		// projection matrix
-		glm::mat4 projection;
-		projection = glm::perspective(glm::radians(45.0f), (float)screenWidth /screenHeight, 0.1f, 100.0f);
+
+		input->update();
+		camera->update();
+
+		clearColorBuffer();
 
 		// Draw our first triangle
 		program.use();
@@ -249,14 +224,9 @@ void Engine::mainLoop()
 		glBindTexture(GL_TEXTURE_2D, texture2);
 		glUniform1i(program.getUniformLocation("ourTexture2"), 1);
 		
-		// Create transformations
-		/*glm::mat4 trans;
-		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-		trans = glm::rotate(trans, glm::radians(_time*50.0f), glm::vec3(0.0, 0.0, 1.0));*/
-		//trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
 		// transform in vertex shader
-		glUniformMatrix4fv(program.getUniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(program.getUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(program.getUniformLocation("view"), 1, GL_FALSE, glm::value_ptr(camera->getView()));
+		glUniformMatrix4fv(program.getUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(camera->getPerspective()));
 
 		glBindVertexArray(VAO);
 		for (GLuint i = 0; i < 10; i++)
@@ -279,7 +249,7 @@ void Engine::mainLoop()
 
 }
 
-void Engine::setDeltaTime()
+void Engine::updateDeltaTime()
 {
 	time = SDL_GetTicks() / 1000.0f; // time in seconds
 	GLfloat currentFrame = time;
@@ -293,91 +263,24 @@ void Engine::clearColorBuffer()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Engine::handleInput()
+void Engine::processCameraMovement()
 {
-	GLfloat cameraSpeed = 0.05f;
-	SDL_Event event;
+	camera->updateYawPitchByMouse(input->getMouseBuffer());
 
-	while (SDL_PollEvent(&event))
-	{
-		handleInputOnEvent(event);
-	}
-}
-
-void Engine::handleInputOnEvent(SDL_Event &event)
-{
-	switch (event.type)
-	{
-	case SDL_QUIT:
-		engineState = EngineState::EXIT;
-		break;
-	case SDL_MOUSEMOTION:
-		camera->UpdateViewByMouse(*window, deltaTime, event.motion.x, event.motion.y, mouseLastX, mouseLastY);
-		break;
-	case SDL_KEYDOWN:
-		updateKeysOnKeyDown(event);
-		break;
-	case SDL_KEYUP:
-		updateKeysOnKeyUp(event);
-		break;
-	}
-}
-
-void Engine::updateKeysOnKeyUp(SDL_Event &event)
-{
-	switch (event.key.keysym.sym)
-	{
-	case SDLK_w:
-		inputKeys[SDLK_w] = false;
-		break;
-	case SDLK_a:
-		inputKeys[SDLK_a] = false;
-		break;
-	case SDLK_s:
-		inputKeys[SDLK_s] = false;
-		break;
-	case SDLK_d:
-		inputKeys[SDLK_d] = false;
-		break;
-	default:
-		break;
-	}
-}
-
-void Engine::updateKeysOnKeyDown(SDL_Event &event)
-{
-	switch (event.key.keysym.sym)
-	{
-	case SDLK_w:
-		inputKeys[SDLK_w] = true;
-		break;
-	case SDLK_a:
-		inputKeys[SDLK_a] = true;
-		break;
-	case SDLK_s:
-		inputKeys[SDLK_s] = true;
-		break;
-	case SDLK_d:
-		inputKeys[SDLK_d] = true;
-		break;
-	case SDLK_ESCAPE:
-		engineState = EngineState::EXIT;
-	default:
-		break;
-	}
-}
-
-
-void Engine::handleMovementOnKeys()
-{
-	if (inputKeys[SDLK_w])
-		camera->UpdatePosition(FORWARD, deltaTime);
-	if (inputKeys[SDLK_a])
-		camera->UpdatePosition(LEFT, deltaTime);
-	if (inputKeys[SDLK_s])
-		camera->UpdatePosition(BACKWARD, deltaTime);
-	if (inputKeys[SDLK_d])
-		camera->UpdatePosition(RIGHT, deltaTime);
+	if (input->isKeyInBuffer(SDLK_w))
+		camera->move(FORWARD);
+	if (input->isKeyInBuffer(SDLK_a))
+		camera->move(LEFT);
+	if (input->isKeyInBuffer(SDLK_s))
+		camera->move(BACKWARD);
+	if (input->isKeyInBuffer(SDLK_d))
+		camera->move(RIGHT);
+	if (input->isKeyInBuffer(LSHIFT))
+		camera->setSpeedMax();
+	else
+		camera->setSpeedMin();
+	if (input->isKeyInBuffer(ESCAPE))
+		engineState = ENGINE_STATE::EXIT;
 }
 
 void Engine::render()
@@ -400,34 +303,4 @@ void Engine::render()
 	SDL_GL_SwapWindow(window);
 }
 
-
-void Engine::updateCamera(float deltaTime, glm::vec2 currMousePos)
-{
-	float cameraRotationSpeed = 0.2f;
-	float heading = 0.0f;
-	float pitch = 0.0f;
-	glm::vec3 dir;
-	
-	//	Mouse &mouse = Mouse::instance();
-	//
-	//	GetMovementDirection(direction);
-
-	glm::vec2 windowCenterPos = { screenWidth / 2, screenHeight / 2 }; // make global
-	glm::vec2 mouseDistanceFromCenter = { currMousePos.x - windowCenterPos.x, windowCenterPos.y - currMousePos.y };
-
-
-	// First Person Camera update
-	pitch = mouseDistanceFromCenter.y  * cameraRotationSpeed;
-	heading = mouseDistanceFromCenter.x * cameraRotationSpeed;
-
-
-	//g_camera.rotate(heading, pitch, 0.0f);
-
-	//	g_camera.updatePosition(direction, elapsedTimeSec);
-	//	PerformCameraCollisionDetection();
-	//
-	//	mouse.moveToWindowCenter();
-	SDL_WarpMouseInWindow(window, windowCenterPos.x, windowCenterPos.y);
-
-}
 

@@ -5,8 +5,8 @@
 #include <GL/glew.h>
 
 #include "GLSLProgram.h"
-#include "Object.h"
 #include "Camera.h"
+#include "Input.h"
 
 #include <glm\glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -14,7 +14,10 @@
 #include <glm/ext.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-enum class EngineState{RUN, EXIT};
+
+
+enum ENGINE_STATE{RUN, EXIT};
+
 
 class Engine
 {
@@ -26,39 +29,35 @@ public:
 
 private:
 	void initSystems();
-	void initMouse();
-	void setupWindowSDL();
+	void initCamera();
+	void initSDLWindow();
 	void initShaders();
 	void mainLoop();
-	void setDeltaTime();
+	void updateDeltaTime();
 	void clearColorBuffer();
-	void handleInput();
+	void processUserInput();
 	void handleInputOnEvent(SDL_Event &event);
 	void updateKeysOnKeyDown(SDL_Event &event);
 	void updateKeysOnKeyUp(SDL_Event &event);
-	void handleMovementOnKeys();
-	void updateCamera(float deltaTime, glm::vec2 mousePos );
+	void processCameraMovement();
 	void render();
 
 	SDL_Window* window;
-	uint32_t screenWidth;
-	uint32_t screenHeight;
-	EngineState engineState;
+	glm::uvec2 screenResolution;
+	ENGINE_STATE engineState;
 	
 	GLSLProgram program;
 
-	Object *triangle;
-
 	Camera *camera;
-	glm::vec3 cameraPos;
-	glm::vec3 cameraUp;
-	glm::vec3 cameraFront;
-	GLfloat cameraYaw;
-	GLfloat cameraPitch;
-	bool inputKeys[1024];
-	GLfloat mouseLastX, mouseLastY;
+	Input *input;
+
+	bool inputKeyBuffer[1024]; 
+	glm::vec2 mouseBuffer;
+	SDL_Event event;
+
 	GLfloat deltaTime = 0.0f;
 	GLfloat lastFrameTime = 0.0f;
 	GLfloat time;
+	
 };
 

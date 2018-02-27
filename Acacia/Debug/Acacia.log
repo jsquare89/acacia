@@ -1,11 +1,2 @@
-﻿  stdafx.cpp
-  main.cpp
-  Object.cpp
-  GLSLProgram.cpp
-  Errors.cpp
-  Engine.cpp
-c:\users\jarred\documents\github\acacia\acacia\engine.cpp(315): warning C4244: 'argument': conversion from 'Sint32' to 'GLfloat', possible loss of data
-c:\users\jarred\documents\github\acacia\acacia\engine.cpp(430): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-  Camera.cpp
-  Generating Code...
+﻿  Engine.cpp
   Acacia.vcxproj -> C:\Users\Jarred\Documents\GitHub\acacia\Debug\Acacia.exe
