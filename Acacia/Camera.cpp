@@ -7,43 +7,18 @@ const glm::vec3 WORLD_XAXIS(1.0f, 0.0f, 0.0f);
 const glm::vec3 WORLD_YAXIS(0.0f, 1.0f, 0.0f);
 const glm::vec3 WORLD_ZAXIS(0.0f, 0.0f, 1.0f);
 const float NINETY_DEGREE_IN_RADIANS = 1.5708;
+const float EYE_SPEED_MIN = 0.001f;
+const float EYE_SPEED_MAX = 0.004f;
 
 Camera::Camera() :	eye(glm::vec3(0.0f, 0.0f, 3.0f)),
 					forward(glm::vec3(0.0f, 0.0f, -1.0f)),
 					up(glm::vec3(0.0f, 1.0f, 0.0f)),
-					movementSpeed(5.0f),
-					cameraRotationSpeed(0.002f),
-					maxPitchRate( 5.0f),
-					maxHeadingRate( 5.0f)
+					cameraRotationSpeed(0.002f)
 {
-	this->worldUp = up;
-	//this->currentRotationX = 0;
-	verticalAngle = 0.0f;
-	horizontalAngle = 0.0f;
 	SetNormRightUp();
 	yawRadians = 0.0f;
 	pitchRadians = 0.0f;
 	orientation = glm::quat();
-	// quaternion implemention
-	_eye = glm::vec3(0.0f, 0.0f, 3.0f);
-	_savedEye = glm::vec3(0.0f, 0.0f, 0.0f);
-	_target = glm::vec3(0.0f, 0.0f, 0.0f);
-	_xAxis = glm::vec3(0.1f, 0.0f, 0.0f);
-	_yAxis = glm::vec3(0.0f, 1.0f, 0.0f);
-	_targetYAxis = glm::vec3(0.0f, 1.0f, 0.0f);
-	_zAxis = glm::vec3(0.0f, 0.0f, 1.0f);
-	_viewDir = glm::vec3(0.0f, 0.0f, -1.0f);
-
-	_acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
-	_currentVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
-	_velocity = glm::vec3(0.0f, 0.0f, 0.0f);
-
-	_projMatrix = glm::mat4();
-	_viewProjMatrix = glm::mat4(); 
-
-	_rotationSpeed = 0.02f;
-
-	_accumPitchDegrees = 0.0f;
 }
 
 
@@ -61,7 +36,7 @@ glm::mat4 Camera::getPerspective()
 	return projection;
 }
 
-void Camera::updateRotationOfView()
+void Camera::updateView()
 {
 	glm::quat qPitch = glm::angleAxis(pitchRadians, glm::vec3(1, 0, 0));
 	glm::quat qYaw = glm::angleAxis(yawRadians, glm::vec3(0, 1, 0));
@@ -73,20 +48,12 @@ void Camera::updateRotationOfView()
 	view = rotatation * translatation;
 }
 
-void Camera::updateView()
-{
-	updateRotationOfView();
-
-
-}
-
 glm::mat4 Camera::getView()
 {
 	return view;
 }
 
-
-void Camera::UpdateYawPitchByMouse(SDL_Window &window, SDL_MouseMotionEvent &mme)
+void Camera::updateYawPitchByMouse(SDL_Window &window, SDL_MouseMotionEvent &mme)
 {
 	yawRadians += (float)mme.xrel * cameraRotationSpeed;
 	pitchRadians += (float)mme.yrel * cameraRotationSpeed;
@@ -94,47 +61,26 @@ void Camera::UpdateYawPitchByMouse(SDL_Window &window, SDL_MouseMotionEvent &mme
 	printf("pitch:%f yaw:%f\n", pitchRadians, yawRadians);
 }
 
-
-void Camera::move(float dx, float dy, float dz)
+void Camera::move(const Camera_Movement &direction)
 {
-	glm::vec3 eye = this->eye;
-	glm::vec3 forwards;
-
-	forwards = glm::cross(WORLD_YAXIS, _xAxis);
-	forwards = glm::normalize(forwards);
-
-	eye += _xAxis * dx;
-	eye += WORLD_YAXIS * dy;
-	eye += forwards * dz;
-
-	setPosition(eye);
-}
-void Camera::move(const glm::vec3 &direction, const glm::vec3 &amount)
-{
-	eye.x += direction.x * amount.x;
-	eye.y += direction.y * amount.y;
-	eye.z += direction.z * amount.z;
-
-	updateRotationOfView();
-}
-
-void Camera::setPosition(const glm::vec3 &position)
-{
-	this->eye = position;
-	updateRotationOfView();
-}
-
-void Camera::UpdatePosition(Camera_Movement direction, GLfloat deltaTime)
-{
-	GLfloat velocity = this->movementSpeed * deltaTime;
+	int dx = 0;
+	int dz = 0;
 	if (direction == FORWARD)
-		this->eye += this->forward * velocity;
+		dz = 1;
 	if (direction == BACKWARD)
-		this->eye -= this->forward * velocity;
+		dz = -1;
 	if (direction == LEFT)
-		this->eye -= this->right * velocity;
+		dx = -1;
 	if (direction == RIGHT)
-		this->eye += this->right * velocity;
+		dx = 1;
+
+	glm::mat4 currentView = view;
+	glm::vec3 forward(currentView[0][2], currentView[1][2], currentView[2][2]);
+	glm::vec3 right(currentView[0][0], currentView[1][0], currentView[2][0]);
+
+	const float speed = EYE_SPEED_MAX;
+
+	eye += (-dz * forward + dx * right) * speed;
 }
 
 void Camera::SetNormRightUp()
@@ -143,10 +89,8 @@ void Camera::SetNormRightUp()
 	this->up = glm::normalize(glm::cross(this->right, this->forward));
 }
 
-
 void Camera::update()
 {
-	updateRotationOfView();
 	updateView();
 }
 

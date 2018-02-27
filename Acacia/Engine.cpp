@@ -280,7 +280,7 @@ void Engine::handleInputOnEvent(SDL_Event &event)
 		engineState = EngineState::EXIT;
 		break;
 	case SDL_MOUSEMOTION:
-		camera->UpdateYawPitchByMouse(*window, event.motion);
+		camera->updateYawPitchByMouse(*window, event.motion);
 		break;
 	case SDL_KEYDOWN:
 		updateKeysOnKeyDown(event);
@@ -339,13 +339,13 @@ void Engine::updateKeysOnKeyDown(SDL_Event &event)
 void Engine::processMovementOnKeys()
 {
 	if (inputKeys[SDLK_w])
-		camera->UpdatePosition(FORWARD, deltaTime);
+		camera->move(FORWARD);
 	if (inputKeys[SDLK_a])
-		camera->UpdatePosition(LEFT, deltaTime);
+		camera->move(LEFT);
 	if (inputKeys[SDLK_s])
-		camera->UpdatePosition(BACKWARD, deltaTime);
+		camera->move(BACKWARD);
 	if (inputKeys[SDLK_d])
-		camera->UpdatePosition(RIGHT, deltaTime);
+		camera->move(RIGHT);
 }
 
 void Engine::render()
