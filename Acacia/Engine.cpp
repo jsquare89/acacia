@@ -48,9 +48,8 @@ void Engine::initMouse()
 void Engine::setupWindowSDL()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_ShowCursor(SDL_ENABLE);
+	//SDL_ShowCursor(SDL_ENABLE);
 	//SDL_WarpMouseInWindow(window, 1024 / 2, 768 / 2);
-	SDL_SetWindowGrab(window, SDL_TRUE);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	window = SDL_CreateWindow("Acacia Engine. Beta Version", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screenResolution.x, screenResolution.y, SDL_WINDOW_OPENGL);
@@ -292,10 +291,11 @@ void Engine::handleInputOnEvent(SDL_Event &event)
 		engineState = EngineState::EXIT;
 		break;
 	case SDL_MOUSEMOTION:
-		/*mouseCurrentPosition.x = event.motion.xrel;
-		mouseCurrentPosition.y = event.motion.yrel;*/
-		camera->UpdateViewByMouse(*window, event.motion);
-		printf("x:%i, y:%i\n", event.motion.x, event.motion.y);
+		
+		camera->UpdateYawPitchByMouse(*window, event.motion, mouseCurrentPosition );
+		printf("x:%i, y:%i\nprevposition x:%i, y:%i\n", event.motion.xrel, event.motion.yrel, mouseCurrentPosition.x, mouseCurrentPosition.y);
+		mouseCurrentPosition.x = event.motion.xrel;
+		mouseCurrentPosition.y = event.motion.yrel;
 		break;
 	case SDL_KEYDOWN:
 		updateKeysOnKeyDown(event);

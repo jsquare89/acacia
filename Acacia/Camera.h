@@ -25,7 +25,7 @@ public:
 	glm::mat4 getView();
 	void Camera::setPerspective(float FieldOfViewDegrees, float aspectRatio, float nearClip, float farClip);
 	
-	void UpdateViewByMouse(SDL_Window &window, SDL_MouseMotionEvent &mme);
+	void UpdateYawPitchByMouse(SDL_Window &window, SDL_MouseMotionEvent &mme, glm::uvec2 prevMouse);
 	void UpdatePosition(Camera_Movement direction, GLfloat deltaTime);
 	void RotateCamera(float headingDegrees, float pitchDegrees);
 	void RotateSmoothly(float headingDegrees, float pitchDegrees, float rollDegrees);
@@ -70,12 +70,12 @@ private:
 	glm::vec3 worldUp;
 
 
-	GLfloat pitch;
-	GLfloat yaw;
+	float pitch;
+	float yaw;
 	GLfloat roll;
 
 	GLfloat movementSpeed;
-	GLfloat cameraRotationSpeed;
+	float cameraRotationSpeed;
 	glm::vec2 mousePosition;
 
 	//GLfloat currentRotationX;

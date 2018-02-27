@@ -19,7 +19,8 @@ Camera::Camera() :	position(glm::vec3(0.0f, 0.0f, 3.0f)),
 	verticalAngle = 0.0f;
 	horizontalAngle = 0.0f;
 	SetNormRightUp();
-
+	yaw = 0.0f;
+	pitch = 0.0f;
 	orientation = glm::quat();
 	// quaternion implemention
 	_eye = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -64,7 +65,7 @@ void Camera::updateView()
 
 	//glm::quat key_quat = glm::quat(glm::vec3(pitch, yaw, roll));
 	
-	glm::quat qPitch = glm::angleAxis(pitch, glm::vec3(-1, 0, 0));
+	glm::quat qPitch = glm::angleAxis(pitch, glm::vec3(1, 0, 0));
 	glm::quat qYaw = glm::angleAxis(yaw, glm::vec3(0, 1, 0));
 	
 	orientation = qPitch * qYaw;
@@ -85,69 +86,15 @@ glm::mat4 Camera::getView()
 }
 
 
-void Camera::UpdateViewByMouse(SDL_Window &window, SDL_MouseMotionEvent &mme)
+void Camera::UpdateYawPitchByMouse(SDL_Window &window, SDL_MouseMotionEvent &mme, glm::uvec2 prevMouse)
 {
-	
-	float xDistanceFromWindowCenter = mme.x- ((float)1024 / 2) ;
-	float yDistanceFromWindowCenter = ((float)720 / 2) - mme.y;
-	yaw = xDistanceFromWindowCenter * cameraRotationSpeed;
-	pitch = yDistanceFromWindowCenter * cameraRotationSpeed;
+	int xDistanceFromWindowCenter =  mme.xrel - prevMouse.x ;
+	int yDistanceFromWindowCenter = prevMouse.x - mme.yrel  ;
+	yaw += (float)mme.xrel * cameraRotationSpeed;
+	pitch += (float)mme.yrel * cameraRotationSpeed;
+	printf("yaw:%f  pitch:%f", yaw, pitch);
 
-	SDL_WarpMouseInWindow(&window, 1024 / 2, 768 / 2);
-}
-
-void Camera::Pitch(float angle)
-{
-	//// Rotate up and look vector about the right vector.
-	//XMMATRIX R =
-	//	XMMatrixRotationAxis(XMLoadFloat3(&mRight), angle);
-	//XMStoreFloat3(&mUp, XMVector3TransformNormal(XMLoadFloat3(&R));
-	//XMStoreFloat3(&mLook,
-	//	XMVector3TransformNormal(XMLoadFloat3(&mLook), R));
-
-	//glm::mat4 rot = glm::rotate( angle, right);
-	//up = glm::normalize(rot);
-	//front = 
-	
-	if (angle < -maxPitchRate)
-		angle = -maxPitchRate;
-	else if (angle > maxPitchRate)
-		angle = maxPitchRate;
-	_pitch += angle;
-
-	//Check bounds for pitch
-	if (_pitch > 360.0f) {
-		_pitch -= 360.0f;
-	}
-	else if (_pitch < -360.0f) {
-		_pitch += 360.0f;
-	}
-}
-
-void Camera::Heading(float angle)
-{
-	//Check bounds with the max heading rate so that we aren't moving too fast
-	if (angle < -maxHeadingRate) {
-		angle = -maxHeadingRate;
-	}
-	else if (angle > maxHeadingRate) {
-		angle = maxHeadingRate;
-	}
-	//This controls how the heading is changed if the camera is pointed straight up or down
-	//The heading delta direction changes
-	if (_pitch > 90 && _pitch < 270 || (_pitch < -90 && _pitch > -270)) {
-		_heading -= angle;
-	}
-	else {
-		_heading += angle;
-	}
-	//Check bounds for the camera heading
-	if (_heading > 360.0f) {
-		_heading -= 360.0f;
-	}
-	else if (_heading < -360.0f) {
-		_heading += 360.0f;
-	}
+	//SDL_WarpMouseInWindow(&window, 1024 / 2, 768 / 2);
 }
 
 void Camera::UpdatePosition(Camera_Movement direction, GLfloat deltaTime)
@@ -171,112 +118,10 @@ void Camera::SetNormRightUp()
 }
 
 
-void Camera::RotateCamera(float yawDegrees, float pitchDegrees)
-{
-	//// Implements the rotation logic for the first person style and
-	//// spectator style camera behaviors. Roll is ignored.
-
-	//_accumPitchDegrees += pitchDegrees;
-
-	//if (_accumPitchDegrees > 90.0f)
-	//{
-	//	pitchDegrees = 90.0f - (_accumPitchDegrees - pitchDegrees);
-	//	_accumPitchDegrees = 90.0f;
-	//}
-
-	//if (_accumPitchDegrees < -90.0f)
-	//{
-	//	pitchDegrees = -90.0f - (_accumPitchDegrees - pitchDegrees);
-	//	_accumPitchDegrees = -90.0f;
-	//}
-
-	//Quaternion rot;
-
-	//// Rotate camera about the world y axis.
-	//// Note the order the quaternions are multiplied. That is important!
-	//if (yawDegrees != 0.0f)
-	//{
-	//	rot = glm::angleAxis(yawDegrees, WORLD_YAXIS);
-	//	_orientation = rot * _orientation;
-	//}
-
-	//// Rotate camera about its local x axis.
-	//// Note the order the quaternions are multiplied. That is important!
-	//if (pitchDegrees != 0.0f)
-	//{
-	//	rot = glm::angleAxis(pitchDegrees, WORLD_XAXIS);
-	//	_orientation = _orientation * rot;
-	//}
-
-	/*glm::quat temp, quat_view, result;
-	
-	temp.x = x * sin(Angle / 2);
-	temp.y = y * sin(Angle / 2);
-	temp.z = z * sin(Angle / 2);
-	temp.w = cos(Angle / 2);
-
-	quat_view.x = view.x;
-	quat_view.y = view.y;
-	quat_view.z = view.z;
-	quat_view.w = 0;
-	
-	result = glm::cross(glm::cross(temp, quat_view), glm::conjugate(temp));
-
-	view.x = result.x;
-	view.y = result.y;
-	view.z = result.z;
-	std::cout << glm::to_string(view);*/
-}
-
-
-
-void Camera::RotateSmoothly(float yawDegrees, float pitchDegrees, float rollDegrees)
-{
-	// This method applies a scaling factor to the rotation angles prior to
-	// using these rotation angles to rotate the camera. This method is usually
-	// called when the camera is being rotated using an input device (such as a
-	// mouse or a joystick). 
-
-	//yawDegrees *= _rotationSpeed;
-	//pitchDegrees *= _rotationSpeed;
-	//rollDegrees *= m_rotationSpeed;
-
-	pitchDegrees = -pitchDegrees;
-	yawDegrees = -yawDegrees;
-
-	RotateCamera(yawDegrees, pitchDegrees);
-
-}
-
-void Camera::SetOrientation(const glm::quat &orientation)
-{
-	glm::mat4 m = glm::toMat4(orientation);
-
-	_accumPitchDegrees = glm::degrees(asinf(m[1][2]));
-	//_orientation = orientation;
-
-	glm::lookAt(_eye, _eye + _viewDir, WORLD_YAXIS);
-	
-}
-
 void Camera::Update()
 {
 	updateView();
 }
-
-//void Camera::Move2D(int x, int y) {
-//	//compute the mouse delta from the previous mouse position
-//	glm::vec3 mouse_delta = mouse_position - glm::vec3(x, y, 0);
-//
-//	//float dx = 
-//	//if the camera is moving, meaning that the mouse was clicked and dragged, change the pitch and heading
-//	
-//		ChangeHeading(.08f * mouse_delta.x);
-//		ChangePitch(.08f * mouse_delta.y);
-//	
-//	mouse_position = glm::vec3(x, y, 0);
-//}
-
 
 void Camera::rotate(float yawDegrees, float pitchDegrees)
 {
