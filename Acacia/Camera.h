@@ -22,14 +22,17 @@ public:
 	glm::mat4 getPerspective();
 	glm::mat4 getView();
 	void Camera::setPerspective(float FieldOfViewDegrees, float aspectRatio, float nearClip, float farClip);
-	void updateYawPitchByMouse(SDL_Window &window, SDL_MouseMotionEvent &mme);
+	void updateYawPitchByMouse(const glm::vec2 &mouseOffset);
 	void move(const Camera_Movement &direction);
+	void setSpeedMax();
+	void setSpeedMin();
 	void update();
 
 private:
 	void updateView();
 	void SetNormRightUp();
 	void constrainPitch();
+	
 
 	glm::vec3 eye;
 	glm::vec3 right;
@@ -42,5 +45,6 @@ private:
 	float pitchRadians;
 	float yawRadians;
 	float cameraRotationSpeed;
+	float speed;
 };
 

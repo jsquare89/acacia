@@ -1,9 +1,2 @@
-﻿  Camera.cpp
-c:\users\jarred\documents\github\acacia\acacia\camera.cpp(9): warning C4305: 'initializing': truncation from 'double' to 'float'
-  Generating Code...
-  Compiling...
-  Engine.cpp
-  Generating Code...
-  Skipping... (no relevant changes detected)
-  main.cpp
+﻿  Engine.cpp
   Acacia.vcxproj -> C:\Users\Jarred\Documents\GitHub\acacia\Debug\Acacia.exe

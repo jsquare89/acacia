@@ -10,13 +10,14 @@
 Engine::Engine() :	screenResolution{1024,768},
 					time(0.0f),
 					window(nullptr),
-					engineState(EngineState::RUN)
+					engineState(ENGINE_STATE::RUN)
 {
 }
 
 Engine::~Engine()
 {
 	delete camera;
+	delete input;
 }
 
 void Engine::run()
@@ -30,7 +31,7 @@ void Engine::initSystems()
 	initSDLWindow();
 	initShaders();
 	initCamera();
-	initMouse();
+	input = new Input();
 }
 
 void Engine::initCamera()
@@ -39,11 +40,6 @@ void Engine::initCamera()
 	camera->setPerspective(70.0f, (float)screenResolution.x / screenResolution.y, 0.1f, 100.0f);
 }
 
-void Engine::initMouse()
-{
-	mouseCurrentPosition.x = 0;
-	mouseCurrentPosition.y = 0;
-}
 
 void Engine::initSDLWindow()
 {
@@ -205,11 +201,14 @@ void Engine::mainLoop()
 	glEnable(GL_DEPTH_TEST);
 
 
-	while (engineState != EngineState::EXIT)
+	while (engineState != ENGINE_STATE::EXIT)
 	{
 		updateDeltaTime();
-		processUserInput();
-		processMovementOnKeys();
+		input->process(event);
+		processCameraMovement();
+
+
+		input->update();
 		camera->update();
 
 		clearColorBuffer();
@@ -264,88 +263,24 @@ void Engine::clearColorBuffer()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Engine::processUserInput()
+void Engine::processCameraMovement()
 {
-	while (SDL_PollEvent(&event))
-	{
-		handleInputOnEvent(event);
-	}
-}
+	camera->updateYawPitchByMouse(input->getMouseBuffer());
 
-void Engine::handleInputOnEvent(SDL_Event &event)
-{
-	switch (event.type)
-	{
-	case SDL_QUIT:
-		engineState = EngineState::EXIT;
-		break;
-	case SDL_MOUSEMOTION:
-		camera->updateYawPitchByMouse(*window, event.motion);
-		break;
-	case SDL_KEYDOWN:
-		updateKeysOnKeyDown(event);
-		break;
-	case SDL_KEYUP:
-		updateKeysOnKeyUp(event);
-		break;
-	}
-}
-
-void Engine::updateKeysOnKeyUp(SDL_Event &event)
-{
-	switch (event.key.keysym.sym)
-	{
-	case SDLK_w:
-		inputKeys[SDLK_w] = false;
-		break;
-	case SDLK_a:
-		inputKeys[SDLK_a] = false;
-		break;
-	case SDLK_s:
-		inputKeys[SDLK_s] = false;
-		break;
-	case SDLK_d:
-		inputKeys[SDLK_d] = false;
-		break;
-	default:
-		break;
-	}
-}
-
-void Engine::updateKeysOnKeyDown(SDL_Event &event)
-{
-	switch (event.key.keysym.sym)
-	{
-	case SDLK_w:
-		inputKeys[SDLK_w] = true;
-		break;
-	case SDLK_a:
-		inputKeys[SDLK_a] = true;
-		break;
-	case SDLK_s:
-		inputKeys[SDLK_s] = true;
-		break;
-	case SDLK_d:
-		inputKeys[SDLK_d] = true;
-		break;
-	case SDLK_ESCAPE:
-		engineState = EngineState::EXIT;
-	default:
-		break;
-	}
-}
-
-
-void Engine::processMovementOnKeys()
-{
-	if (inputKeys[SDLK_w])
+	if (input->isKeyInBuffer(SDLK_w))
 		camera->move(FORWARD);
-	if (inputKeys[SDLK_a])
+	if (input->isKeyInBuffer(SDLK_a))
 		camera->move(LEFT);
-	if (inputKeys[SDLK_s])
+	if (input->isKeyInBuffer(SDLK_s))
 		camera->move(BACKWARD);
-	if (inputKeys[SDLK_d])
+	if (input->isKeyInBuffer(SDLK_d))
 		camera->move(RIGHT);
+	if (input->isKeyInBuffer(LSHIFT))
+		camera->setSpeedMax();
+	else
+		camera->setSpeedMin();
+	if (input->isKeyInBuffer(ESCAPE))
+		engineState = ENGINE_STATE::EXIT;
 }
 
 void Engine::render()

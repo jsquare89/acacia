@@ -19,6 +19,7 @@ Camera::Camera() :	eye(glm::vec3(0.0f, 0.0f, 3.0f)),
 	yawRadians = 0.0f;
 	pitchRadians = 0.0f;
 	orientation = glm::quat();
+	speed = EYE_SPEED_MIN;
 }
 
 
@@ -53,10 +54,10 @@ glm::mat4 Camera::getView()
 	return view;
 }
 
-void Camera::updateYawPitchByMouse(SDL_Window &window, SDL_MouseMotionEvent &mme)
+void Camera::updateYawPitchByMouse(const glm::vec2 &mouseOffset)
 {
-	yawRadians += (float)mme.xrel * cameraRotationSpeed;
-	pitchRadians += (float)mme.yrel * cameraRotationSpeed;
+	yawRadians += mouseOffset.x * cameraRotationSpeed;
+	pitchRadians += mouseOffset.y * cameraRotationSpeed;
 	constrainPitch();
 	printf("pitch:%f yaw:%f\n", pitchRadians, yawRadians);
 }
@@ -77,8 +78,6 @@ void Camera::move(const Camera_Movement &direction)
 	glm::mat4 currentView = view;
 	glm::vec3 forward(currentView[0][2], currentView[1][2], currentView[2][2]);
 	glm::vec3 right(currentView[0][0], currentView[1][0], currentView[2][0]);
-
-	const float speed = EYE_SPEED_MAX;
 
 	eye += (-dz * forward + dx * right) * speed;
 }
@@ -104,4 +103,14 @@ void Camera::constrainPitch()
 	{
 		pitchRadians = -NINETY_DEGREE_IN_RADIANS;
 	}
+}
+
+void Camera::setSpeedMax()
+{
+	speed = EYE_SPEED_MAX;
+}
+
+void Camera::setSpeedMin()
+{
+	speed = EYE_SPEED_MIN;
 }
