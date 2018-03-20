@@ -7,6 +7,8 @@
 #include "GLSLProgram.h"
 #include "Camera.h"
 #include "Input.h"
+#include "Mesh.h"
+#include "Texture.h"
 
 #include <glm\glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -19,11 +21,11 @@
 enum ENGINE_STATE{RUN, EXIT};
 
 
-class Engine
+class AcaciaEngine
 {
 public:
-	Engine();
-	~Engine();
+	AcaciaEngine();
+	~AcaciaEngine();
 
 	void run();
 
@@ -35,11 +37,7 @@ private:
 	void mainLoop();
 	void updateDeltaTime();
 	void clearColorBuffer();
-	void processUserInput();
-	void handleInputOnEvent(SDL_Event &event);
-	void updateKeysOnKeyDown(SDL_Event &event);
-	void updateKeysOnKeyUp(SDL_Event &event);
-	void processCameraMovement();
+	void processCameraMovementFromInput();
 	void render();
 
 	SDL_Window* window;

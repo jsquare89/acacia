@@ -59,7 +59,6 @@ void Camera::updateYawPitchByMouse(const glm::vec2 &mouseOffset)
 	yawRadians += mouseOffset.x * cameraRotationSpeed;
 	pitchRadians += mouseOffset.y * cameraRotationSpeed;
 	constrainPitch();
-	printf("pitch:%f yaw:%f\n", pitchRadians, yawRadians);
 }
 
 void Camera::move(const Camera_Movement &direction)

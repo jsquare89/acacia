@@ -7,7 +7,7 @@
 
 int main(int argc, char** argv)
 {
-	Engine engine;
+	AcaciaEngine engine;
 	engine.run();
     return 0;
 }
