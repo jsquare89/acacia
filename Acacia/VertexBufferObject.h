@@ -23,6 +23,7 @@ struct VBO_Data {
 	std::vector<glm::vec3> normals;
 	std::vector<glm::vec2> texcoords;
 	std::vector<glm::vec3> tangents;
+	std::vector<unsigned int> indices;
 };
 
 class VertexBufferObject
@@ -35,8 +36,8 @@ public:
 	void bindBuffer(const GLenum &usage);
 	void destroy();
 
-	void enable();
-	void disable();
+	void enable() const;
+	void disable() const;
 	void populateData(const OBJData &objData);
 
 	void debugPrintData();
@@ -44,16 +45,18 @@ public:
 	VertexBufferObject();
 	~VertexBufferObject();
 
-	VBO_Data data;
+	unsigned int getDataPositionSize();
+	
 private:
-	void enableVertexBufferObject();
-	void disableVertexBufferObject();
-	void enableVertexArray();
-	void disableVertexArray();
+	void enableVertexBufferObject() const;
+	void disableVertexBufferObject() const;
+	void enableVertexArray() const;
+	void disableVertexArray() const;
 	
 	GLuint id;
 	VBO_Offset offset;
 	VBO_Size size;
+	VBO_Data data;
 };
 
 

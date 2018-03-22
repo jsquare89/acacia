@@ -6,7 +6,7 @@
 class Texture
 {
 public:
-	virtual void load(const char *fileName);
+	virtual void load(const char *fileName, GLenum textureType);
 	virtual void destroy();
 
 	GLuint getId() const { return id; }
@@ -22,6 +22,9 @@ private:
 	void loadData(GLenum target, int width, int height, unsigned char * image);
 	void bind();
 	void unbind();
+
+	void loadTextureCubeMap(const char *filename);
+	void loadTexture2d(const char *filename);
 
 	GLuint id;
 	static bool generateMipmap;

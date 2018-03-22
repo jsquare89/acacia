@@ -4,19 +4,23 @@
 #include <string>
 
 
-class GLSLProgram
+class Shader
 {
 public:
-	void compileShaders(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath);
-	void linkShaders();
+	void compile(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath);
+	void link();
+	
+	void setUniform1f(GLuint location, float value);
+	void setUniform3f(GLuint location, glm::vec3 vec);
+	void setUniformMatrix4(GLuint location, glm::mat4 mat);
 	void addAttribute(const std::string& attributeName);
 	GLuint getUniformLocation(const std::string uniformName);
 	GLuint getId();
-	void use();
-	void unuse();
+	void use() const;
+	void unuse() const;
 
-	GLSLProgram();
-	~GLSLProgram();
+	Shader();
+	~Shader();
 
 private:
 	void compileShader(const std::string& filePath, GLuint& id);

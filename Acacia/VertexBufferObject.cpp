@@ -61,6 +61,8 @@ void VertexBufferObject::bindBuffer(const GLenum &usage)
 		glBufferSubData(GL_ARRAY_BUFFER, offset.tangents, size.tangents, (const GLvoid*)(&data.tangents[0]));
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	std::cout << "VBO Bind Buffer - id=" << id << std::endl;
 }
 
 
@@ -79,12 +81,20 @@ void VertexBufferObject::populateData(const OBJData & objData)
 {
 	for (int i = 0; i < objData.faceData.vertexIndices.size(); i++)
 	{
-		glm::vec3 vertex(objData.tempData.vertices[objData.faceData.vertexIndices[i]]);
-		glm::vec3 normal(objData.tempData.normals[objData.faceData.normalIndices[i]]);
+		//glm::vec3 vertex(objData.tempData.vertices[objData.faceData.vertexIndices[i]]);
 		glm::vec2 texcoord(objData.tempData.uvs[objData.faceData.uvIndices[i]]);
-		data.positions.push_back(vertex);
-		data.normals.push_back(normal);
+		glm::vec3 normal(objData.tempData.normals[objData.faceData.normalIndices[i]]);
+		//data.positions.push_back(vertex);
+		
+		data.indices.push_back(objData.faceData.vertexIndices[i]);
 		data.texcoords.push_back(texcoord);
+		data.normals.push_back(normal);
+		
+	}
+	
+	for (int i = 0; i < objData.tempData.vertices.size(); i++)
+	{
+		data.positions.push_back(objData.tempData.vertices[i]);
 	}
 
 	// TDO: Remove Debug
@@ -109,6 +119,11 @@ void VertexBufferObject::debugPrintData()
 	{
 		std::cout << glm::to_string(uv) << std::endl;
 	}
+	std::cout << "Indices" << std::endl;
+	for each (unsigned int index in data.indices)
+	{
+		std::cout << index << std::endl;
+	}
 }
 
 VertexBufferObject::VertexBufferObject()
@@ -120,7 +135,12 @@ VertexBufferObject::~VertexBufferObject()
 {
 }
 
-void VertexBufferObject::enable()
+unsigned int VertexBufferObject::getDataPositionSize()
+{
+	return data.positions.size();
+}
+
+void VertexBufferObject::enable() const
 {
 	if (id)
 		enableVertexBufferObject();
@@ -128,7 +148,7 @@ void VertexBufferObject::enable()
 		disableVertexArray();
 }
 
-void VertexBufferObject::disable()
+void VertexBufferObject::disable() const
 {
 	if (id)
 		disableVertexBufferObject();
@@ -136,11 +156,10 @@ void VertexBufferObject::disable()
 		enableVertexArray();
 }
 
-void VertexBufferObject::enableVertexBufferObject()
+void VertexBufferObject::enableVertexBufferObject() const
 {
 	unsigned int slot = 0;
 	glBindBuffer(GL_ARRAY_BUFFER, id);
-
 	
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)offset.positions);
 	// Old Code: OpenGL 2.1 standard
@@ -168,7 +187,7 @@ void VertexBufferObject::enableVertexBufferObject()
 	}
 }
 
-void VertexBufferObject::disableVertexBufferObject()
+void VertexBufferObject::disableVertexBufferObject() const
 {
 	unsigned int slot = 0;
 
@@ -192,7 +211,7 @@ void VertexBufferObject::disableVertexBufferObject()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void VertexBufferObject::enableVertexArray()
+void VertexBufferObject::enableVertexArray() const
 {
 	unsigned int slot = 0;
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -219,7 +238,7 @@ void VertexBufferObject::enableVertexArray()
 	}
 }
 
-void VertexBufferObject::disableVertexArray()
+void VertexBufferObject::disableVertexArray() const
 {
 	unsigned int slot = 0;
 

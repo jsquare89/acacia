@@ -7,10 +7,18 @@ Texture::Texture()
 	id = 0;
 }
 
-void Texture::load(const char *fileName)
+void Texture::loadTexture2d(const char *filename)
 {
-	GLenum textureType = GL_TEXTURE_2D;
+	load(filename, GL_TEXTURE_2D);
+}
 
+void Texture::loadTextureCubeMap(const char *filename)
+{
+	load(filename, GL_TEXTURE_CUBE_MAP);
+}
+
+void Texture::load(const char *filename, GLenum textureType)
+{
 	gen();
 	if (id == 0)
 	{
@@ -22,7 +30,7 @@ void Texture::load(const char *fileName)
 	bind();
 	//Load, create texture
 	int width, height;
-	unsigned char* image = SOIL_load_image(fileName, &width, &height, 0, SOIL_LOAD_RGB);
+	unsigned char* image = SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGB);
 	loadData(textureType, width, height, image);
 	setTextureParameters(textureType);
 	unbind();
@@ -49,7 +57,12 @@ void Texture::gen()
 
 void Texture::loadData(GLenum textureType, int width, int height, unsigned char * image)
 {
-	glTexImage2D(textureType, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	if(textureType == GL_TEXTURE_2D)
+		glTexImage2D(textureType, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	if (textureType == GL_TEXTURE_CUBE_MAP)
+	{
+		
+	}
 }
 
 void Texture::bind()

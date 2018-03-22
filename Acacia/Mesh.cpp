@@ -16,10 +16,9 @@ void Mesh::load(const char * fileName)
 
 	
 	// TODO: isObjFile()
-	std::string filepath = "res/meshes/";
-	filepath.append(fileName);
+	
 
-	*VBO = OBJParser().getVBODatafromOBJ(filepath.c_str());
+	*VBO = OBJParser().getVBODatafromOBJ(fileName);
 	VBO->create(GL_STATIC_DRAW);
 }
 
@@ -33,6 +32,21 @@ void Mesh::destroy()
 void Mesh::draw()
 {
 	VBO->enable();
-	glDrawArrays(GL_TRIANGLES, 0, VBO->data.positions.size());
+	glDrawArrays(GL_TRIANGLES, 0, VBO->getDataPositionSize());
 	VBO->disable();
+}
+
+void Mesh::bind() const
+{
+	VBO->enable();
+}
+
+void Mesh::unbind() const
+{
+	VBO->disable();
+}
+
+unsigned int Mesh::getVertexCount() const
+{
+	return VBO->getDataPositionSize();
 }

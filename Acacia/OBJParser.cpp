@@ -3,11 +3,11 @@
 #include <sstream>
 #include <fstream>
 
-VertexBufferObject OBJParser::getVBODatafromOBJ(const char * filepath)
+VertexBufferObject OBJParser::getVBODatafromOBJ(const char * filename)
 {
 	VertexBufferObject VBO;
 	OBJData objData;
-	scanObjFileIntoObjData(filepath, objData);
+	scanObjFileIntoObjData(getOBJstring(filename).c_str(), objData);
 	VBO.populateData(objData);
 	return VBO;
 }
@@ -21,7 +21,13 @@ OBJParser::~OBJParser()
 {
 }
 
-
+std::string OBJParser::getOBJstring(const char * filename)
+{
+	std::string filepath = "res/meshes/";
+	filepath.append(filename);
+	filepath.append(".obj");
+	return filepath;
+}
 
 void OBJParser::scanObjFileIntoObjData(const char * filepath, OBJData &objData)
 {

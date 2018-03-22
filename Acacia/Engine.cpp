@@ -34,13 +34,6 @@ void AcaciaEngine::initSystems()
 	input = new Input();
 }
 
-void AcaciaEngine::initCamera()
-{
-	camera = new Camera();
-	camera->setPerspective(70.0f, (float)screenResolution.x / screenResolution.y, 0.1f, 100.0f);
-}
-
-
 void AcaciaEngine::initSDLWindow()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -61,15 +54,22 @@ void AcaciaEngine::initSDLWindow()
 
 void AcaciaEngine::initShaders()
 {
-	program.compileShaders("colorShading.vert", "colorShading.frag");
-	program.linkShaders();
+	shader.compile("colorShading.vert", "colorShading.frag");
+	shader.link();
+}
+
+void AcaciaEngine::initCamera()
+{
+	camera = new Camera();
+	camera->setPerspective(70.0f, (float)screenResolution.x / screenResolution.y, 0.1f, 100.0f);
 }
 
 void AcaciaEngine::mainLoop()
 {
-
-	Mesh myCube;
-	myCube.load("cube.obj");
+	Mesh cube;
+	cube.load("cube");
+	Entity myCube(&cube, glm::vec3(0, 0, -5), glm::vec3(0, 0, 0), 1);
+	
 	
 
 	
@@ -84,14 +84,35 @@ void AcaciaEngine::mainLoop()
 		input->update();
 		camera->update();
 
-		myCube.draw();
+		renderer.prepare();
+		shader.use();
 
-		// all code below to refactor to render once working properly
-		clearColorBuffer();
+		GLfloat white[] = { 1.0, 1.0, 1.0, 1.0 };
+		glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHT0);
+		GLfloat pos[] = { 0.0, 0.0, 1.0, 0.0 };
+		glLightfv(GL_LIGHT0, GL_POSITION, pos);
+		glLightfv(GL_LIGHT0, GL_AMBIENT, white);
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, white);
+		glLightfv(GL_LIGHT0, GL_SPECULAR, white);
 
-		program.use();
-
+		shader.setUniformMatrix4(shader.getUniformLocation("view"), camera->getView());
+		shader.setUniformMatrix4(shader.getUniformLocation("projection"), camera->getPerspective());
+		//glUniformMatrix4fv(shader.getUniformLocation("view"), 1, GL_FALSE, glm::value_ptr(camera->getView()));
+		//glUniformMatrix4fv(shader.getUniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(camera->getPerspective()));
+		//glUniformMatrix4fv(program.getUniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
 		
+		//glm::mat4 model;
+		//	GLfloat angle = glm::radians(20.0f * i);
+		//	if (i % 3 == 0) // make every 3rd cube rotate
+		//		angle = time * angle;
+		//	model = glm::translate(model, cubePositions[i]);
+		//	model = glm::rotate(model,
+		//		angle, glm::vec3(1.0f, 0.3f, 0.5f));
+		shader.setUniformMatrix4(shader.getUniformLocation("model"), myCube.getTransformMatrix());
+		
+		renderer.render(myCube, shader);
+
 
 		SDL_GL_SwapWindow(window);
 	}
@@ -104,12 +125,6 @@ void AcaciaEngine::updateDeltaTime()
 	GLfloat currentFrame = time;
 	deltaTime = currentFrame - lastFrameTime;
 	lastFrameTime = currentFrame;
-}
-
-void AcaciaEngine::clearColorBuffer()
-{
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void AcaciaEngine::processCameraMovementFromInput()

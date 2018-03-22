@@ -12,6 +12,7 @@ public:
 	~OBJParser();
 
 private:
+	std::string OBJParser::getOBJstring(const char * filename);
 	void scanObjFileIntoObjData(const char * filepath, OBJData &objData);
 	void scanLineIntoObjData(std::string &lineBuffer, OBJData & objData);
 	void scanVertexIntoObjData(std::string &lineBuffer, OBJData &objData);

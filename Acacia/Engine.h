@@ -4,11 +4,13 @@
 #include <SDL/SDL.h>
 #include <GL/glew.h>
 
-#include "GLSLProgram.h"
+#include "Shader.h"
+#include "Renderer.h"
 #include "Camera.h"
 #include "Input.h"
 #include "Mesh.h"
 #include "Texture.h"
+#include "Entity.h"
 
 #include <glm\glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -36,7 +38,6 @@ private:
 	void initShaders();
 	void mainLoop();
 	void updateDeltaTime();
-	void clearColorBuffer();
 	void processCameraMovementFromInput();
 	void render();
 
@@ -44,8 +45,8 @@ private:
 	glm::uvec2 screenResolution;
 	ENGINE_STATE engineState;
 	
-	GLSLProgram program;
-
+	Shader shader;
+	Renderer renderer;
 	Camera *camera;
 	Input *input;
 

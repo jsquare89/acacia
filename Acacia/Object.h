@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GL/glew.h>
-#include "GLSLProgram.h"
+#include "Shader.h"
 
 class Object
 {

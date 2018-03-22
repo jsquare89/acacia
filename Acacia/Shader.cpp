@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "GLSLProgram.h"
+#include "Shader.h"
 #include "Errors.h"
 
 #include <vector>
@@ -7,17 +7,17 @@
 
 #include <SOIL\SOIL.h>
 
-GLSLProgram::GLSLProgram() : numAttributes(0), id(0), vertexShaderId(0), fragmentShaderId(0)
+Shader::Shader() : numAttributes(0), id(0), vertexShaderId(0), fragmentShaderId(0)
 {
 
 }
 
 
-GLSLProgram::~GLSLProgram()
+Shader::~Shader()
 {
 }
 
-void GLSLProgram::compileShaders(const std::string& vertexShaderFileName, const std::string& fragmentShaderFileName)
+void Shader::compile(const std::string& vertexShaderFileName, const std::string& fragmentShaderFileName)
 {
 	std::string filePath = "res/shaders/";
 	std::string vertexShaderFilePath = filePath + vertexShaderFileName;
@@ -42,7 +42,7 @@ void GLSLProgram::compileShaders(const std::string& vertexShaderFileName, const 
 	compileShader(fragmentShaderFilePath, fragmentShaderId);
 }
 
-void GLSLProgram::linkShaders()
+void Shader::link()
 {
 	glAttachShader(id, vertexShaderId);
 	glAttachShader(id, fragmentShaderId);
@@ -73,12 +73,12 @@ void GLSLProgram::linkShaders()
 	glDeleteShader(fragmentShaderId);
 }
 
-void GLSLProgram::addAttribute(const std::string& attributeName)
+void Shader::addAttribute(const std::string& attributeName)
 {
 	glBindAttribLocation(id, numAttributes++, attributeName.c_str());
 }
 
-GLuint GLSLProgram::getUniformLocation(const std::string uniformName)
+GLuint Shader::getUniformLocation(const std::string uniformName)
 {
 	GLuint location = glGetUniformLocation(id, uniformName.c_str());
 	if (location == GL_INVALID_INDEX) {
@@ -87,13 +87,28 @@ GLuint GLSLProgram::getUniformLocation(const std::string uniformName)
 	return location;
 }
 
-GLuint GLSLProgram::getId()
+void Shader::setUniform1f(GLuint location, float value)
+{
+	glUniform1f(location, value);
+}
+
+void Shader::setUniform3f(GLuint location, glm::vec3 vec)
+{
+	glUniform3f(location, vec.x,vec.y,vec.z);
+	
+}
+
+void Shader::setUniformMatrix4(GLuint location, glm::mat4 mat)
+{
+	glUniformMatrix4fv(location, sizeof(glm::mat4), GL_FALSE, glm::value_ptr(mat));
+}
+
+GLuint Shader::getId()
 {
 	return id;
 }
 
-
-void GLSLProgram::use()
+void Shader::use() const
 {
 	glUseProgram(id);
 	for (int i = 0; i < numAttributes; i++)
@@ -101,7 +116,7 @@ void GLSLProgram::use()
 		glEnableVertexAttribArray(i);
 	}
 }
-void GLSLProgram::unuse()
+void Shader::unuse() const
 {
 	glUseProgram(0);
 	for (int i = 0; i < numAttributes; i++)
@@ -110,7 +125,7 @@ void GLSLProgram::unuse()
 	}
 }
 
-void GLSLProgram::compileShader(const std::string& filePath, GLuint& id)
+void Shader::compileShader(const std::string& filePath, GLuint& id)
 {
 	std::ifstream stream(filePath);
 	if (stream.fail())
