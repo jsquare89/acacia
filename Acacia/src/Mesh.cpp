@@ -9,16 +9,28 @@ Mesh::Mesh()
 	VBO = NULL;
 }
 
-void Mesh::load(const char * fileName)
+Mesh::Mesh(const char * filename)
 {
-	std::cout << "Loading mesh " << std::string(fileName) << std::endl;
+	VBO = NULL;
+	load(filename);
+}
+
+Mesh& Mesh::operator = (const Mesh &m)
+{
+	VBO = m.VBO;
+	return *this;
+}
+
+void Mesh::load(const char * filename)
+{
+	std::cout << "Loading mesh " << std::string(filename) << std::endl;
 	VBO = new VertexBufferObject();
 
 	
 	// TODO: isObjFile()
 	
 
-	*VBO = OBJParser().getVBODatafromOBJ(fileName);
+	*VBO = OBJParser().getVBODatafromOBJ(filename);
 	VBO->create(GL_STATIC_DRAW);
 }
 
@@ -36,9 +48,18 @@ void Mesh::draw()
 	VBO->disable();
 }
 
-void Mesh::bind() const
+void Mesh::drawElements()
 {
 	VBO->enable();
+	glDrawElements(GL_TRIANGLES, VBO->getDataPositionSize(), GL_UNSIGNED_INT, 0);
+	//glDrawArrays(GL_TRIANGLES, 0, VBO->getDataPositionSize());
+	VBO->disable();
+}
+
+void Mesh::bind() const
+{
+	//VBO->enable();
+	
 }
 
 void Mesh::unbind() const

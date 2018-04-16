@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Texture.h"
-
+#include <assert.h>
 
 Texture::Texture()
 {
@@ -30,7 +30,7 @@ void Texture::load(const char *filename, GLenum textureType)
 	bind();
 	//Load, create texture
 	int width, height;
-	unsigned char* image = SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGB);
+	unsigned char* image = SOIL_load_image(getFilePath(filename).c_str(), &width, &height, 0, SOIL_LOAD_RGB);
 	loadData(textureType, width, height, image);
 	setTextureParameters(textureType);
 	unbind();
@@ -39,12 +39,19 @@ void Texture::load(const char *filename, GLenum textureType)
 	printf("Loaded image\n");
 }
 
+std::string Texture::getFilePath(const char* filename)
+{
+	std::string filePath = "res/textures/";
+	filePath.append(filename);
+	filePath.append(".jpg");
+	return filePath;
+}
 void Texture::setTextureParameters(const GLenum &textureType)
 {
-	glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_REPEAT);	// Set texture wrapping to GL_REPEAT
+	glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glGenerateMipmap(textureType);
 }
 
@@ -67,19 +74,20 @@ void Texture::loadData(GLenum textureType, int width, int height, unsigned char 
 
 void Texture::bind()
 {
-	glBindTexture(GL_TEXTURE_2D, id); // All upcoming GL_TEXTURE_2D operations now have effect on our texture object
+	glBindTexture(GL_TEXTURE_2D, id); 
 }
 
 void Texture::bind(GLuint slot) const
 {
+	assert(slot >= 0 && slot <= 31);
+
 	glActiveTexture(GL_TEXTURE0 + slot);
-	//glEnable(getTextureType());
 	glBindTexture(GL_TEXTURE_2D, id);
 }
 
 void Texture::unbind()
 {
-	glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture when done, so we won't accidentily mess up our texture.
+	glBindTexture(GL_TEXTURE_2D, 0); 
 }
 
 void Texture::unbind(GLuint slot) const

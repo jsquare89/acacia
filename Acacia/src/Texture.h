@@ -6,7 +6,7 @@
 class Texture
 {
 public:
-	virtual void load(const char *fileName, GLenum textureType);
+	virtual void load(const char *filename, GLenum textureType);
 	virtual void destroy();
 
 	GLuint getId() const { return id; }
@@ -18,6 +18,7 @@ public:
 	~Texture();
 private:
 	void gen();
+	std::string getFilePath(const char* filename);
 	void setTextureParameters(const GLenum &textureType);
 	void loadData(GLenum target, int width, int height, unsigned char * image);
 	void bind();

@@ -79,7 +79,7 @@ void VertexBufferObject::destroy()
 
 void VertexBufferObject::populateData(const OBJData & objData)
 {
-	for (int i = 0; i < objData.faceData.vertexIndices.size(); i++)
+	for (unsigned int i = 0; i < objData.faceData.vertexIndices.size(); i++)
 	{
 		//glm::vec3 vertex(objData.tempData.vertices[objData.faceData.vertexIndices[i]]);
 		glm::vec2 texcoord(objData.tempData.uvs[objData.faceData.uvIndices[i]]);
@@ -92,7 +92,7 @@ void VertexBufferObject::populateData(const OBJData & objData)
 		
 	}
 	
-	for (int i = 0; i < objData.tempData.vertices.size(); i++)
+	for (unsigned int i = 0; i < objData.tempData.vertices.size(); i++)
 	{
 		data.positions.push_back(objData.tempData.vertices[i]);
 	}
@@ -122,8 +122,9 @@ void VertexBufferObject::debugPrintData()
 	std::cout << "Indices" << std::endl;
 	for each (unsigned int index in data.indices)
 	{
-		std::cout << index << std::endl;
+		std::cout << index << ", ";
 	}
+	std::cout << std::endl;
 }
 
 VertexBufferObject::VertexBufferObject()
@@ -138,6 +139,11 @@ VertexBufferObject::~VertexBufferObject()
 unsigned int VertexBufferObject::getDataPositionSize()
 {
 	return data.positions.size();
+}
+
+void * VertexBufferObject::getIndices()
+{
+	return &data.indices;
 }
 
 void VertexBufferObject::enable() const

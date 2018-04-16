@@ -3,13 +3,46 @@
 #include <sstream>
 #include <fstream>
 
-VertexBufferObject OBJParser::getVBODatafromOBJ(const char * filename)
+VertexBufferObject OBJParser::getVBODatafromOBJ(const char * ObjFilename)
 {
 	VertexBufferObject VBO;
 	OBJData objData;
-	scanObjFileIntoObjData(getOBJstring(filename).c_str(), objData);
+	scanObjFileIntoObjData(getOBJstring(ObjFilename).c_str(), objData);
 	VBO.populateData(objData);
 	return VBO;
+}
+
+ModelData OBJParser::getModelData(const char * ObjFilename)
+{
+	ModelData model;
+	OBJData obj;
+	scanObjFileIntoObjData(getOBJstring(ObjFilename).c_str(), obj);
+	model = getModelDatafromOBJData(obj);
+	return model;
+}
+
+ModelData OBJParser::getModelDatafromOBJData(const OBJData &obj)
+{
+	ModelData model;
+	for (unsigned int i = 0; i < obj.faceData.vertexIndices.size(); i++)
+	{
+		glm::vec2 texcoord(obj.tempData.uvs[obj.faceData.uvIndices[i]]);
+		glm::vec3 normal(obj.tempData.normals[obj.faceData.normalIndices[i]]);
+		model.texcoords.push_back(texcoord.x);
+		model.texcoords.push_back(texcoord.y);
+		model.normals.push_back(normal.x);
+		model.normals.push_back(normal.y);
+		model.normals.push_back(normal.z);
+		model.indices.push_back(obj.faceData.vertexIndices[i]);
+	}
+
+	for (unsigned int i = 0; i < obj.tempData.vertices.size(); i++)
+	{
+		model.positions.push_back(obj.tempData.vertices[i].x);
+		model.positions.push_back(obj.tempData.vertices[i].y);
+		model.positions.push_back(obj.tempData.vertices[i].z);
+	}
+	return model;
 }
 
 OBJParser::OBJParser()
@@ -82,6 +115,8 @@ void OBJParser::scanLineIntoObjData(std::string &line, OBJData & objData)
 		}
 
 	}
+
+
 }
 
 void OBJParser::scanVertexIntoObjData(std::string &line, OBJData &objData)
@@ -127,4 +162,43 @@ void OBJParser::scanFaceIntoObjData(std::string &line, OBJData &objData)
 	objData.faceData.normalIndices.push_back(--normalIndex[0]);
 	objData.faceData.normalIndices.push_back(--normalIndex[1]);
 	objData.faceData.normalIndices.push_back(--normalIndex[2]);
+}
+
+void OBJParser::debugPrintData(const ModelData &data)
+{
+	std::cout << "Vertices" << std::endl;
+	for (unsigned int i = 0; i < data.positions.size(); i++)
+	{
+		if (i % 3 == 0)
+		{
+			std::cout << std::endl;
+			std::cout << "v ";
+		}
+		std::cout << data.positions[i] << " ";
+	}
+
+	std::cout << "\n\nUVs";
+	for (unsigned int i = 0; i < data.texcoords.size(); i++)
+	{
+		if (i % 2 == 0)
+		{
+			std::cout << std::endl;
+			std::cout << "vt ";
+		}
+		std::cout << data.texcoords[i] << " ";
+	}
+
+	std::cout << "\n\nNormals";
+	for (unsigned int i = 0; i < data.normals.size(); i++)
+	{
+		if (i % 3 == 0)
+		{
+			std::cout << std::endl;
+			std::cout << "vn ";
+		}
+		std::cout << data.normals[i] << " ";
+	}
+
+	
+	std::cout << std::endl;
 }

@@ -4,8 +4,6 @@
 #include <SDL/SDL.h>
 #include <GL/glew.h>
 
-#include "Shader.h"
-#include "Renderer.h"
 #include "Camera.h"
 #include "Input.h"
 #include "Mesh.h"
@@ -39,20 +37,19 @@ private:
 	void mainLoop();
 	void updateDeltaTime();
 	void processCameraMovementFromInput();
-	void render();
 
 	SDL_Window* window;
 	glm::uvec2 screenResolution;
 	ENGINE_STATE engineState;
 	
-	Shader shader;
-	Renderer renderer;
+	
 	Camera *camera;
 	Input *input;
 
 	bool inputKeyBuffer[1024]; 
 	glm::vec2 mouseBuffer;
 	SDL_Event event;
+	SDL_GLContext glContext;
 
 	GLfloat deltaTime = 0.0f;
 	GLfloat lastFrameTime = 0.0f;

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Entity.h"
 
-Entity::Entity(Mesh *mesh, glm::vec3 position, glm::vec3 rotation, float scale)
+Entity::Entity(const Mesh &mesh,const glm::vec3 &position,const glm::vec3 &rotation, const float &scale)
 {
 	this->mesh = mesh;
 	this->position = position;
@@ -25,7 +25,7 @@ void Entity::setRotation(glm::vec3 rot)
 
 }
 
-Mesh * Entity::getMesh() const
+Mesh Entity::getMesh() const
 {
 	return mesh;
 }

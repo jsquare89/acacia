@@ -46,6 +46,7 @@ public:
 	~VertexBufferObject();
 
 	unsigned int getDataPositionSize();
+	void* getIndices();
 	
 private:
 	void enableVertexBufferObject() const;

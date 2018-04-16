@@ -6,7 +6,7 @@ const GLfloat DEFAULT_FOV = 90.0f;
 const glm::vec3 WORLD_XAXIS(1.0f, 0.0f, 0.0f);
 const glm::vec3 WORLD_YAXIS(0.0f, 1.0f, 0.0f);
 const glm::vec3 WORLD_ZAXIS(0.0f, 0.0f, 1.0f);
-const float NINETY_DEGREE_IN_RADIANS = 1.5708;
+const float NINETY_DEGREE_IN_RADIANS = 1.5708f;
 const float EYE_SPEED_MIN = 0.001f;
 const float EYE_SPEED_MAX = 0.004f;
 
