@@ -54,6 +54,7 @@ void Renderer::render(const VertexArray& vao, const IndexBuffer& ibo, const Shad
 {
 	shader.bind();
 	vao.bind();
-	ibo.bind();
-	glDrawElements(GL_TRIANGLES, ibo.getCount(), GL_UNSIGNED_INT, nullptr);
+	//ibo.bind();
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	//glDrawElements(GL_TRIANGLES, ibo.getCount(), GL_UNSIGNED_INT, nullptr);
 }

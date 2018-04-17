@@ -34,14 +34,18 @@ ModelData OBJParser::getModelDatafromOBJData(const OBJData &obj)
 		model.normals.push_back(normal.y);
 		model.normals.push_back(normal.z);
 		model.indices.push_back(obj.faceData.vertexIndices[i]);
+		glm::vec3 vertex(obj.tempData.vertices[obj.faceData.vertexIndices[i]]);
+		model.positions.push_back(vertex.x);
+		model.positions.push_back(vertex.y);
+		model.positions.push_back(vertex.z);
 	}
 
-	for (unsigned int i = 0; i < obj.tempData.vertices.size(); i++)
+	/*for (unsigned int i = 0; i < obj.tempData.vertices.size(); i++)
 	{
 		model.positions.push_back(obj.tempData.vertices[i].x);
 		model.positions.push_back(obj.tempData.vertices[i].y);
 		model.positions.push_back(obj.tempData.vertices[i].z);
-	}
+	}*/
 	return model;
 }
 

@@ -1,2 +1,20 @@
-﻿  Texture.cpp
+﻿  stdafx.cpp
+  model.cpp
+  main.cpp
+  VertexBufferObject.cpp
+  VertexBufferLayout.cpp
+  VertexBuffer.cpp
+  VertexArray.cpp
+  Texture.cpp
+  Shader.cpp
+  Renderer.cpp
+  Object.cpp
+  OBJParser.cpp
+  Mesh.cpp
+  Input.cpp
+  IndexBuffer.cpp
+  Errors.cpp
+  Entity.cpp
+  Engine.cpp
+  Camera.cpp
   Acacia.vcxproj -> C:\Users\Jarred\Documents\GitHub\acacia\Debug\Acacia.exe
