@@ -69,6 +69,8 @@ void AcaciaEngine::initCamera()
 
 void AcaciaEngine::mainLoop()
 {
+	Timer timer;
+
 	ModelData cubeModel = OBJParser().getModelData("cube"); // abstract to model/entity
 	Shader colorShader("colorShading.vert", "colorShading.frag");
 	
@@ -116,6 +118,7 @@ void AcaciaEngine::mainLoop()
 	while (engineState != ENGINE_STATE::EXIT)
 	{
 		// Update game loop //
+		timer.update();
 		updateDeltaTime();
 		input->process(event);
 		processCameraMovementFromInput();
@@ -151,6 +154,7 @@ void AcaciaEngine::updateDeltaTime()
 	GLfloat currentFrame = time;
 	deltaTime = currentFrame - lastFrameTime;
 	lastFrameTime = currentFrame;
+	std::cout << "Time: " << lastFrameTime << std::endl;
 }
 
 void AcaciaEngine::processCameraMovementFromInput()

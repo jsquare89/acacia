@@ -40,6 +40,7 @@ ModelData OBJParser::getModelDatafromOBJData(const OBJData &obj)
 		model.positions.push_back(vertex.z);
 	}
 
+	// for indexing
 	/*for (unsigned int i = 0; i < obj.tempData.vertices.size(); i++)
 	{
 		model.positions.push_back(obj.tempData.vertices[i].x);

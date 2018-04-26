@@ -4,11 +4,13 @@
 #include <SDL/SDL.h>
 #include <GL/glew.h>
 
+#include "Timer.h"
 #include "Camera.h"
 #include "Input.h"
 #include "Mesh.h"
 #include "Texture.h"
 #include "Entity.h"
+
 
 #include <glm\glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
