@@ -1,2 +1,22 @@
-﻿  Engine.cpp
+﻿  Camera.cpp
+  Engine.cpp
+  Entity.cpp
+  Errors.cpp
+  IndexBuffer.cpp
+  Input.cpp
+  main.cpp
+  Mesh.cpp
+  model.cpp
+  Object.cpp
+  OBJParser.cpp
+  Renderer.cpp
+  Shader.cpp
+  stdafx.cpp
+  Texture.cpp
+  VertexArray.cpp
+  VertexBuffer.cpp
+  VertexBufferLayout.cpp
+  VertexBufferObject.cpp
+  Timer.cpp
+     Creating library C:\Users\Jarred\Documents\GitHub\acacia\Debug\Acacia.lib and object C:\Users\Jarred\Documents\GitHub\acacia\Debug\Acacia.exp
   Acacia.vcxproj -> C:\Users\Jarred\Documents\GitHub\acacia\Debug\Acacia.exe

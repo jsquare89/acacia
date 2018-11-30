@@ -121,7 +121,6 @@ void OBJParser::scanLineIntoObjData(std::string &line, OBJData & objData)
 
 	}
 
-
 }
 
 void OBJParser::scanVertexIntoObjData(std::string &line, OBJData &objData)

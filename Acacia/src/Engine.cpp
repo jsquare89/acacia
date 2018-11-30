@@ -154,7 +154,6 @@ void AcaciaEngine::updateDeltaTime()
 	GLfloat currentFrame = time;
 	deltaTime = currentFrame - lastFrameTime;
 	lastFrameTime = currentFrame;
-	std::cout << "Time: " << lastFrameTime << std::endl;
 }
 
 void AcaciaEngine::processCameraMovementFromInput()
